@@ -1,14 +1,34 @@
 <!DOCTYPE html>
+<!-- The lang and dir attributes will be set dynamically by JavaScript -->
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO & Social Sharing Meta Tags -->
     <title>محمد ابراهيم عبدالله | Automation & AI Integration Specialist</title>
+    <meta name="description" content="محفظة أعمال محمد ابراهيم عبدالله، متخصص في أتمتة العمليات، تكامل الذكاء الاصطناعي، وبناء حلول ذكية باستخدام n8n وواجهات مخصصة.">
+    <meta name="keywords" content="n8n, automation, AI integration, Telegram bot, SaaS, no-code, Mohammed Ibrahim Abdullah, أتمتة, ذكاء اصطناعي">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="YOUR_WEBSITE_URL"> <!-- ضع رابط موقعك هنا -->
+    <meta property="og:title" content="محمد ابراهيم عبدالله | Automation & AI Integration Specialist">
+    <meta property="og:description" content="بناء أنظمة ذكية لربط أفكارك بالواقع الرقمي بكفاءة عالية.">
+    <meta property="og:image" content="https://raw.githubusercontent.com/Mohammed5778/Projectshtml/main/504081164_4273169156238679_1780606122166042485_n.jpg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="YOUR_WEBSITE_URL"> <!-- ضع رابط موقعك هنا -->
+    <meta property="twitter:title" content="محمد ابراهيم عبدالله | Automation & AI Integration Specialist">
+    <meta property="twitter:description" content="بناء أنظمة ذكية لربط أفكارك بالواقع الرقمي بكفاءة عالية.">
+    <meta property="twitter:image" content="https://raw.githubusercontent.com/Mohammed5778/Projectshtml/main/504081164_4273169156238679_1780606122166042485_n.jpg">
+
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -17,7 +37,6 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
     <style>
-        /* CSS Variables for Theming */
         :root {
             --bg-color: #02040a;
             --primary-dark: #0d1117;
@@ -28,818 +47,480 @@
             --neon-cyan: #00e5ff;
             --neon-blue: #2f81f7;
             --neon-gradient: linear-gradient(90deg, var(--neon-cyan), var(--neon-blue));
-            --font-family: 'Tajawal', sans-serif;
+            --font-family-ar: 'Tajawal', sans-serif;
+            --font-family-en: 'Poppins', sans-serif;
         }
 
-        /* Global Styles & Scrollbar */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        html[lang="ar"] body { font-family: var(--font-family-ar); }
+        html[lang="en"] body { font-family: var(--font-family-en); }
 
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            font-family: var(--font-family);
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            line-height: 1.7;
-            overflow-x: hidden;
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: var(--primary-dark);
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--neon-blue);
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--neon-cyan);
-        }
-
-        /* Utility Classes */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        .section {
-            padding: 100px 0;
-            border-bottom: 1px solid var(--border-color);
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-        }
-
-        .section.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 2.8rem;
-            margin-bottom: 60px;
-            font-weight: 800;
-            background: var(--neon-gradient);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            position: relative;
-        }
-
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80px;
-            height: 3px;
-            background: var(--neon-gradient);
-            border-radius: 2px;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { background-color: var(--bg-color); color: var(--text-primary); line-height: 1.7; overflow-x: hidden; }
         
-        /* Header & Navigation */
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            padding: 20px 0;
-            z-index: 1000;
-            background: rgba(2, 4, 10, 0.8);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border-color);
-            transition: top 0.3s;
-        }
-        .nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .nav-logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            text-decoration: none;
-        }
-        .nav-list {
-            list-style: none;
-            display: flex;
-            gap: 30px;
-        }
-        .nav-link {
-            text-decoration: none;
-            color: var(--text-secondary);
-            font-weight: 500;
-            transition: color 0.3s ease, text-shadow 0.3s ease;
-            position: relative;
-            padding: 5px 0;
-        }
-        .nav-link:hover, .nav-link.active {
-            color: var(--text-primary);
-            text-shadow: 0 0 5px var(--neon-cyan);
-        }
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--neon-gradient);
-            transition: width 0.3s ease;
-        }
-        .nav-link:hover::after, .nav-link.active::after {
-            width: 100%;
-        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .section { padding: 100px 0; border-bottom: 1px solid var(--border-color); opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
+        .section.visible { opacity: 1; transform: translateY(0); }
+        .section-title { text-align: center; font-size: 2.8rem; margin-bottom: 60px; font-weight: 800; background: var(--neon-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; position: relative; }
+        .section-title::after { content: ''; position: absolute; bottom: -15px; left: 50%; transform: translateX(-50%); width: 80px; height: 3px; background: var(--neon-gradient); border-radius: 2px; }
 
-        /* Hero Section */
-        #hero {
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 15% 50%, rgba(0, 229, 255, 0.1), transparent 40%),
-                radial-gradient(circle at 85% 30%, rgba(47, 129, 247, 0.1), transparent 40%);
-            z-index: -1;
-        }
-
-        .hero-content {
-            max-width: 800px;
-        }
-        .hero-title {
-            font-size: 4rem;
-            font-weight: 800;
-            margin-bottom: 10px;
-        }
-        .hero-subtitle {
-            font-size: 1.8rem;
-            margin-bottom: 20px;
-            background: var(--neon-gradient);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        .hero-description {
-            font-size: 1.1rem;
-            color: var(--text-secondary);
-            margin-bottom: 40px;
-        }
-        .hero-social-links a {
-            color: var(--text-secondary);
-            font-size: 1.5rem;
-            margin: 0 15px;
-            transition: color 0.3s, text-shadow 0.3s;
-        }
-        .hero-social-links a:hover {
-            color: var(--neon-cyan);
-            text-shadow: 0 0 10px var(--neon-cyan);
-        }
-
-        /* About Section - UPDATED */
-        #about .container {
-            display: flex;
-            align-items: center;
-            gap: 60px;
-        }
-        .about-image-container {
-            flex-basis: 350px;
-            min-width: 280px;
-            position: relative;
-        }
-        .about-image {
-            width: 100%;
-            border-radius: 12px;
-            border: 2px solid var(--border-color);
-            box-shadow: 0 0 25px rgba(47, 129, 247, 0.25);
-            transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
-        }
-        .about-image:hover {
-            transform: scale(1.05) translateY(-5px);
-            box-shadow: 0 0 40px rgba(0, 229, 255, 0.4);
-            border-color: var(--neon-cyan);
-        }
-        .about-content {
-            flex: 1;
-        }
-        .about-content h3 {
-            font-size: 2rem;
-            margin-bottom: 20px;
-            font-weight: 700;
-        }
-        .about-content p {
-            margin-bottom: 20px;
-            color: var(--text-secondary);
-        }
-        .certificates-btn {
-            display: inline-block;
-            text-decoration: none;
-            color: var(--bg-color);
-            background: var(--neon-gradient);
-            padding: 12px 30px;
-            border-radius: 50px;
-            font-weight: 700;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        .certificates-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 229, 255, 0.2);
-        }
-
-        /* Services Section */
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-        }
-        .service-card {
-            background: var(--secondary-dark);
-            padding: 30px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
-        }
-        .service-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--neon-cyan);
-            box-shadow: 0 0 25px rgba(0, 229, 255, 0.15);
-        }
-        .service-icon {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            background: var(--neon-gradient);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        .service-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-        }
-        .service-card p {
-            color: var(--text-secondary);
-        }
+        .header { position: fixed; top: 0; left: 0; width: 100%; padding: 15px 0; z-index: 1000; background: rgba(2, 4, 10, 0.8); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); transition: top 0.3s; }
+        .nav { display: flex; justify-content: space-between; align-items: center; }
+        .nav-logo { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); text-decoration: none; }
+        .nav-menu { display: flex; align-items: center; gap: 30px; }
+        .nav-list { list-style: none; display: flex; gap: 30px; }
+        .nav-link { text-decoration: none; color: var(--text-secondary); font-weight: 500; transition: color 0.3s ease, text-shadow 0.3s ease; position: relative; padding: 5px 0; }
+        .nav-link:hover, .nav-link.active { color: var(--text-primary); text-shadow: 0 0 5px var(--neon-cyan); }
+        .nav-link::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2px; background: var(--neon-gradient); transition: width 0.3s ease; }
+        .nav-link:hover::after, .nav-link.active::after { width: 100%; }
         
-        /* Projects Section */
-        .project-filters {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 50px;
-        }
-        .filter-btn {
-            background: transparent;
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            padding: 10px 25px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: 500;
-            font-family: var(--font-family);
-            transition: all 0.3s;
-        }
-        .filter-btn:hover {
-            color: var(--text-primary);
-            background: var(--secondary-dark);
-            border-color: var(--neon-blue);
-        }
-        .filter-btn.active {
-            color: var(--bg-color);
-            background: var(--neon-gradient);
-            border-color: transparent;
-            font-weight: 700;
-        }
-        .projects-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 30px;
-        }
-        .project-card {
-            background: var(--secondary-dark);
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-            transition: transform 0.3s, box-shadow 0.3s;
-            display: flex;
-            flex-direction: column;
-        }
-        .project-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 0 30px rgba(47, 129, 247, 0.2);
-        }
-        .project-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .project-content {
-            padding: 25px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        .project-category {
-            display: inline-block;
-            background: rgba(47, 129, 247, 0.1);
-            color: var(--neon-blue);
-            padding: 5px 15px;
-            border-radius: 50px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            margin-bottom: 15px;
-        }
-        .project-title {
-            font-size: 1.4rem;
-            margin-bottom: 10px;
-        }
-        .project-description {
-            color: var(--text-secondary);
-            flex-grow: 1;
-            margin-bottom: 20px;
-        }
-        .project-link {
-            text-decoration: none;
-            color: var(--neon-cyan);
-            font-weight: 700;
-            align-self: flex-start;
-        }
-        .project-link i {
-            margin-left: 5px;
-            transition: transform 0.3s;
-        }
-        .project-link:hover i {
-            transform: translateX(-5px);
-        }
+        .lang-switcher { display: flex; border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden; }
+        .lang-btn { background: transparent; border: none; color: var(--text-secondary); padding: 5px 15px; cursor: pointer; font-family: var(--font-family-en); font-weight: 600; transition: all 0.3s; }
+        .lang-btn.active { color: var(--bg-color); background: var(--neon-gradient); }
+        .lang-btn:first-child { border-right: 1px solid var(--border-color); }
+        html[dir="rtl"] .lang-btn:first-child { border-right: none; border-left: 1px solid var(--border-color); }
 
-        /* Contact Section */
-        #contact-form {
-            max-width: 700px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .form-group {
-            position: relative;
-        }
-        .form-input {
-            width: 100%;
-            padding: 15px 20px;
-            background: var(--secondary-dark);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-size: 1rem;
-            font-family: var(--font-family);
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-        .form-input:focus {
-            outline: none;
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 10px rgba(47, 129, 247, 0.3);
-        }
-        .form-input::placeholder {
-            color: var(--text-secondary);
-        }
-        textarea.form-input {
-            resize: vertical;
-            min-height: 150px;
-        }
-        .submit-btn {
-            padding: 15px;
-            border-radius: 8px;
-            border: none;
-            background: var(--neon-gradient);
-            color: var(--bg-color);
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        .submit-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 229, 255, 0.2);
-        }
-        #form-status {
-            text-align: center;
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            display: none;
-        }
-        #form-status.success {
-            background-color: rgba(0, 229, 255, 0.1);
-            color: var(--neon-cyan);
-            display: block;
-        }
-        #form-status.error {
-            background-color: rgba(255, 71, 87, 0.1);
-            color: #ff4757;
-            display: block;
-        }
+        #hero { height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; position: relative; overflow: hidden; }
+        .hero-background { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 15% 50%, rgba(0, 229, 255, 0.1), transparent 40%), radial-gradient(circle at 85% 30%, rgba(47, 129, 247, 0.1), transparent 40%); z-index: -1; }
+        .hero-content { max-width: 800px; }
+        .hero-title { font-size: 4rem; font-weight: 800; margin-bottom: 10px; }
+        .hero-subtitle { font-size: 1.8rem; margin-bottom: 20px; background: var(--neon-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .hero-description { font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 40px; }
+        .hero-social-links a { color: var(--text-secondary); font-size: 1.5rem; margin: 0 15px; transition: color 0.3s, text-shadow 0.3s; }
+        .hero-social-links a:hover { color: var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan); }
+
+        #about .container { display: flex; align-items: center; gap: 60px; }
+        .about-image-container { flex-basis: 350px; min-width: 280px; order: 2; }
+        .about-image { width: 100%; border-radius: 12px; border: 2px solid var(--border-color); box-shadow: 0 0 25px rgba(47, 129, 247, 0.25); transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease; }
+        .about-image:hover { transform: scale(1.05) translateY(-5px); box-shadow: 0 0 40px rgba(0, 229, 255, 0.4); border-color: var(--neon-cyan); }
+        .about-content { flex: 1; order: 1; }
+        html[dir="rtl"] .about-content { text-align: right; }
+        html[dir="ltr"] .about-content { text-align: left; }
+        .about-content h3 { font-size: 2rem; margin-bottom: 20px; font-weight: 700; }
+        .about-content p { margin-bottom: 20px; color: var(--text-secondary); }
+        .certificates-btn { display: inline-block; text-decoration: none; color: var(--bg-color); background: var(--neon-gradient); padding: 12px 30px; border-radius: 50px; font-weight: 700; transition: transform 0.3s, box-shadow 0.3s; }
+        .certificates-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0, 229, 255, 0.2); }
+        .certificates-btn i { margin-inline-end: 8px; }
+
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+        .service-card { background: var(--secondary-dark); padding: 30px; border-radius: 12px; border: 1px solid var(--border-color); transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s; }
+        .service-card:hover { transform: translateY(-10px); border-color: var(--neon-cyan); box-shadow: 0 0 25px rgba(0, 229, 255, 0.15); }
+        .service-icon { font-size: 2.5rem; margin-bottom: 20px; background: var(--neon-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .service-card h3 { font-size: 1.5rem; margin-bottom: 15px; }
+        .service-card p { color: var(--text-secondary); }
         
-        /* Footer */
-        .footer {
-            padding: 40px 0;
-            text-align: center;
-            background: var(--primary-dark);
-        }
-        .footer-social-links {
-            margin-bottom: 20px;
-        }
-        .footer-social-links a {
-            color: var(--text-secondary);
-            font-size: 1.5rem;
-            margin: 0 15px;
-            transition: color 0.3s, text-shadow 0.3s;
-        }
-        .footer-social-links a:hover {
-            color: var(--neon-cyan);
-            text-shadow: 0 0 10px var(--neon-cyan);
-        }
-        .footer-copyright {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
+        .project-filters { display: flex; justify-content: center; gap: 20px; margin-bottom: 50px; }
+        .filter-btn { background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); padding: 10px 25px; border-radius: 50px; cursor: pointer; font-weight: 500; transition: all 0.3s; }
+        .filter-btn:hover { color: var(--text-primary); background: var(--secondary-dark); border-color: var(--neon-blue); }
+        .filter-btn.active { color: var(--bg-color); background: var(--neon-gradient); border-color: transparent; font-weight: 700; }
+        .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; }
+        .project-card { background: var(--secondary-dark); border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); transition: transform 0.3s, box-shadow 0.3s; display: flex; flex-direction: column; }
+        .project-card:hover { transform: translateY(-10px); box-shadow: 0 0 30px rgba(47, 129, 247, 0.2); }
+        .project-image { width: 100%; height: 200px; object-fit: cover; border-bottom: 1px solid var(--border-color); }
+        .project-content { padding: 25px; flex-grow: 1; display: flex; flex-direction: column; }
+        .project-category { display: inline-block; background: rgba(47, 129, 247, 0.1); color: var(--neon-blue); padding: 5px 15px; border-radius: 50px; font-size: 0.8rem; font-weight: 700; margin-bottom: 15px; align-self: flex-start; }
+        .project-title { font-size: 1.4rem; margin-bottom: 10px; }
+        .project-description { color: var(--text-secondary); flex-grow: 1; margin-bottom: 20px; }
+        .project-link { text-decoration: none; color: var(--neon-cyan); font-weight: 700; align-self: flex-start; }
+        .project-link .arrow-icon { transition: transform 0.3s; display: inline-block; }
+        html[dir="rtl"] .project-link .arrow-icon { margin-right: 5px; }
+        html[dir="ltr"] .project-link .arrow-icon { margin-left: 5px; }
+        html[dir="rtl"] .project-link:hover .arrow-icon { transform: translateX(-5px); }
+        html[dir="ltr"] .project-link:hover .arrow-icon { transform: translateX(5px); }
+        
+        #contact-form { max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        .form-input { width: 100%; padding: 15px 20px; background: var(--secondary-dark); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-size: 1rem; transition: border-color 0.3s, box-shadow 0.3s; }
+        html[lang="ar"] .form-input { font-family: var(--font-family-ar); }
+        html[lang="en"] .form-input { font-family: var(--font-family-en); }
+        .form-input:focus { outline: none; border-color: var(--neon-blue); box-shadow: 0 0 10px rgba(47, 129, 247, 0.3); }
+        .form-input::placeholder { color: var(--text-secondary); }
+        textarea.form-input { resize: vertical; min-height: 150px; }
+        .submit-btn { padding: 15px; border-radius: 8px; border: none; background: var(--neon-gradient); color: var(--bg-color); font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s; }
+        .submit-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0, 229, 255, 0.2); }
+        #form-status { text-align: center; margin-top: 20px; padding: 15px; border-radius: 8px; display: none; }
+        #form-status.success { background-color: rgba(0, 229, 255, 0.1); color: var(--neon-cyan); display: block; }
+        #form-status.error { background-color: rgba(255, 71, 87, 0.1); color: #ff4757; display: block; }
+        
+        .footer { padding: 40px 0; text-align: center; background: var(--primary-dark); }
+        .footer-social-links { margin-bottom: 20px; }
+        .footer-social-links a { color: var(--text-secondary); font-size: 1.5rem; margin: 0 15px; transition: color 0.3s, text-shadow 0.3s; }
+        .footer-social-links a:hover { color: var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan); }
+        .footer-copyright { color: var(--text-secondary); font-size: 0.9rem; }
 
-        /* Responsive Design */
         @media (max-width: 992px) {
-            .nav-list {
-                gap: 20px;
-            }
-            #about .container {
-                flex-direction: column-reverse; /* Puts text above image on mobile */
-                text-align: center;
-            }
+            .nav-menu { flex-direction: column; gap: 15px; margin-top: 15px; }
+            .nav { flex-direction: column; }
+            #about .container { flex-direction: column; }
+            .about-image-container { order: 1; margin-bottom: 40px; }
+            .about-content { order: 2; text-align: center !important; }
         }
         @media (max-width: 768px) {
-            .nav {
-                flex-direction: column;
-                gap: 15px;
-            }
-            .hero-title {
-                font-size: 3rem;
-            }
-            .hero-subtitle {
-                font-size: 1.5rem;
-            }
-            .section-title {
-                font-size: 2.2rem;
-            }
-            .project-filters {
-                flex-wrap: wrap;
-            }
+            .hero-title { font-size: 3rem; }
+            .hero-subtitle { font-size: 1.5rem; }
+            .section-title { font-size: 2.2rem; }
+            .project-filters { flex-wrap: wrap; }
         }
         @media (max-width: 480px) {
-            .hero-title {
-                font-size: 2.5rem;
-            }
-            .hero-subtitle {
-                font-size: 1.3rem;
-            }
-            .project-filters {
-                flex-direction: column;
-                gap: 10px;
-            }
+            .hero-title { font-size: 2.5rem; }
+            .hero-subtitle { font-size: 1.3rem; }
+            .project-filters { flex-direction: column; gap: 10px; }
+            .nav-list { flex-direction: column; gap: 10px; text-align: center; }
+            .nav-menu { gap: 20px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Header -->
     <header class="header" id="header">
         <nav class="nav container">
-            <a href="#hero" class="nav-logo">محمد ابراهيم عبدالله</a>
-            <ul class="nav-list">
-                <li><a href="#about" class="nav-link">من أنا</a></li>
-                <li><a href="#services" class="nav-link">خدماتي</a></li>
-                <li><a href="#projects" class="nav-link">المشاريع</a></li>
-                <li><a href="#contact" class="nav-link">تواصل معي</a></li>
-            </ul>
+            <a href="#hero" class="nav-logo" data-translate="nav_logo">محمد ابراهيم عبدالله</a>
+            <div class="nav-menu">
+                <ul class="nav-list">
+                    <li><a href="#about" class="nav-link" data-translate="nav_about">من أنا</a></li>
+                    <li><a href="#services" class="nav-link" data-translate="nav_services">خدماتي</a></li>
+                    <li><a href="#projects" class="nav-link" data-translate="nav_projects">المشاريع</a></li>
+                    <li><a href="#contact" class="nav-link" data-translate="nav_contact">تواصل معي</a></li>
+                </ul>
+                <div class="lang-switcher">
+                    <button class="lang-btn" data-lang="en">EN</button>
+                    <button class="lang-btn" data-lang="ar">AR</button>
+                </div>
+            </div>
         </nav>
     </header>
 
     <main>
-        <!-- Hero Section -->
         <section id="hero">
             <div class="hero-background"></div>
             <div class="hero-content">
-                <h1 class="hero-title">محمد ابراهيم عبدالله</h1>
-                <h2 class="hero-subtitle">متخصص في أتمتة العمليات وتكامل الذكاء الاصطناعي</h2>
-                <p class="hero-description">أقوم ببناء أنظمة ذكية وحلول مخصصة تربط بين أفكارك والواقع الرقمي، باستخدام أدوات متقدمة مثل n8n وواجهات برمجية مخصصة لتحقيق أقصى كفاءة.</p>
+                <h1 class="hero-title" data-translate="hero_title">محمد ابراهيم عبدالله</h1>
+                <h2 class="hero-subtitle" data-translate="hero_subtitle">متخصص في أتمتة العمليات وتكامل الذكاء الاصطناعي</h2>
+                <p class="hero-description" data-translate="hero_description">أقوم ببناء أنظمة ذكية وحلول مخصصة تربط بين أفكارك والواقع الرقمي، باستخدام أدوات متقدمة مثل n8n وواجهات برمجية مخصصة لتحقيق أقصى كفاءة.</p>
                 <div class="hero-social-links">
-                    <!-- ==== قم بالتعديل هنا: ضع روابطك الحقيقية ==== -->
-                    <a href="https://github.com/your-username" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                    <a href="https://github.com/Mohammed5778" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
                     <a href="https://linkedin.com/in/your-profile" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
                 </div>
             </div>
         </section>
 
-        <!-- About Me Section -->
         <section id="about" class="section">
             <div class="container">
-                <!-- NEW: Image Container -->
                 <div class="about-image-container">
-                    <img src="https://raw.githubusercontent.com/Mohammed5778/Projectshtml/main/504081164_4273169156238679_1780606122166042485_n.jpg" alt="صورة شخصية لـ محمد ابراهيم عبدالله" class="about-image">
+                    <img src="https://raw.githubusercontent.com/Mohammed5778/Projectshtml/main/504081164_4273169156238679_1780606122166042485_n.jpg" alt="Personal photo of Mohammed Ibrahim Abdullah" class="about-image">
                 </div>
-                
-                <!-- Content Container -->
                 <div class="about-content">
-                    <span class="section-title" style="text-align: right; font-size: 2.5rem; margin-bottom: 30px;">من أنا</span>
-                    <h3>بناء الجسور بين الأفكار والأنظمة الذكية</h3>
-                    <p>
-                        شغفي يكمن في تحويل العمليات المعقدة إلى أنظمة تلقائية وسلسة. بخبرة في بناء ووركفلوهات متقدمة باستخدام n8n، تطوير بوتات تليجرام تفاعلية، وتصميم واجهات مستخدم مخصصة، أقدم حلولاً مبتكرة للشركات والأفراد.
-                    </p>
-                    <p>
-                        أجمع بين مهاراتي في "vibe coding" — حيث أبرمج بمنطق مرن دون التقيد بلغة معينة — وخبرتي السابقة في صناعة الألعاب (Godot/GDScript)، لإنشاء حلول ليست فقط فعالة، بل أيضًا ذكية وممتعة في التفاعل معها.
-                    </p>
+                    <h2 class="section-title" style="text-align: inherit; margin-bottom: 30px; display: inline-block;" data-translate="about_section_title">من أنا</h2>
+                    <h3 data-translate="about_heading">بناء الجسور بين الأفكار والأنظمة الذكية</h3>
+                    <p data-translate="about_p1">شغفي يكمن في تحويل العمليات المعقدة إلى أنظمة تلقائية وسلسة. بخبرة في بناء ووركفلوهات متقدمة باستخدام n8n، تطوير بوتات تليجرام تفاعلية، وتصميم واجهات مستخدم مخصصة، أقدم حلولاً مبتكرة للشركات والأفراد.</p>
+                    <p data-translate="about_p2">أجمع بين مهاراتي في "vibe coding" — حيث أبرمج بمنطق مرن دون التقيد بلغة معينة — وخبرتي السابقة في صناعة الألعاب (Godot/GDScript)، لإنشاء حلول ليست فقط فعالة، بل أيضًا ذكية وممتعة في التفاعل معها.</p>
                     <a href="/certificates.pdf" target="_blank" class="certificates-btn">
-                        <i class="fas fa-file-pdf"></i> تحميل ملف الشهادات
+                        <i class="fas fa-file-pdf"></i>
+                        <span data-translate="about_cert_btn_text">تحميل ملف الشهادات</span>
                     </a>
                 </div>
             </div>
         </section>
 
-        <!-- Services Section -->
         <section id="services" class="section">
             <div class="container">
-                <h2 class="section-title">الخدمات التي أقدمها</h2>
-                <div class="services-grid">
-                    <div class="service-card">
-                        <div class="service-icon"><i class="fas fa-cogs"></i></div>
-                        <h3>أتمتة العمليات بـ n8n</h3>
-                        <p>بناء ووركفلوهات مخصصة لربط تطبيقاتك (Google Sheets, Telegram, Email, Webhooks) وتوفير الوقت والجهد.</p>
-                    </div>
-                    <div class="service-card">
-                        <div class="service-icon"><i class="fas fa-robot"></i></div>
-                        <h3>أدوات ذكاء اصطناعي</h3>
-                        <p>إنشاء أدوات لتحليل الملفات (PDF، صور)، خدمة العملاء، أو توليد المحتوى بالاعتماد على تكامل GPT.</p>
-                    </div>
-                    <div class="service-card">
-                        <div class="service-icon"><i class="fas fa-desktop"></i></div>
-                        <h3>مواقع SaaS وواجهات مخصصة</h3>
-                        <p>تطوير مواقع SaaS موجهة للعملاء وتصميم واجهات ذكية ومرنة للتحكم في أنظمة الأتمتة.</p>
-                    </div>
-                    <div class="service-card">
-                        <div class="service-icon"><i class="fa-brands fa-telegram"></i></div>
-                        <h3>بوتات تليجرام مخصصة</h3>
-                        <p>برمجة بوتات تليجرام تفاعلية لأنظمة التنبيهات الفورية، إدارة العملاء، أو كنقطة وصول لخدماتك.</p>
-                    </div>
-                    <div class="service-card">
-                        <div class="service-icon"><i class="fas fa-lightbulb"></i></div>
-                        <h3>استشارات تقنية</h3>
-                        <p>تقديم استشارات في تكامل واجهات GPT، اختيار أدوات No-Code المناسبة، وتصميم بنية الأنظمة المؤتمتة.</p>
-                    </div>
-                    <div class="service-card">
-                        <div class="service-icon"><i class="fas fa-gamepad"></i></div>
-                        <h3>تطوير ألعاب 2D/3D</h3>
-                        <p>خبرة في تطوير الألعاب باستخدام محرك Godot وGDScript، لبناء تجارب تفاعلية فريدة.</p>
-                    </div>
-                </div>
+                <h2 class="section-title" data-translate="services_title">الخدمات التي أقدمها</h2>
+                <div class="services-grid"></div>
             </div>
         </section>
 
-        <!-- Projects Section -->
         <section id="projects" class="section">
             <div class="container">
-                <h2 class="section-title">أبرز المشاريع</h2>
-                
-                <div class="project-filters">
-                    <button class="filter-btn active" data-filter="الكل">الكل</button>
-                    <button class="filter-btn" data-filter="مواقع">مواقع</button>
-                    <button class="filter-btn" data-filter="n8n Workflows">n8n Workflows</button>
-                </div>
-
+                <h2 class="section-title" data-translate="projects_title">أبرز المشاريع</h2>
+                <div class="project-filters"></div>
                 <div class="projects-grid" id="projects-grid"></div>
             </div>
         </section>
 
-        <!-- Contact Section -->
         <section id="contact" class="section">
             <div class="container">
-                <h2 class="section-title">تواصل معي</h2>
-                <p style="text-align: center; max-width: 600px; margin: -40px auto 50px; color: var(--text-secondary);">
-                    هل لديك فكرة مشروع؟ أو ترغب في مناقشة حلول أتمتة لعملك؟ املأ النموذج أدناه وسأتواصل معك قريبًا.
-                </p>
-                <form id="contact-form">
-                    <div class="form-group">
-                        <input type="text" id="name" name="name" class="form-input" placeholder="الاسم الكامل" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="email" id="email" name="email" class="form-input" placeholder="البريد الإلكتروني" required>
-                    </div>
-                    <div class="form-group">
-                        <textarea id="message" name="message" class="form-input" placeholder="رسالتك أو تفاصيل مشروعك" required></textarea>
-                    </div>
-                    <button type="submit" class="submit-btn" id="submit-button">إرسال الطلب</button>
+                <h2 class="section-title" data-translate="contact_title">تواصل معي</h2>
+                <p style="text-align: center; max-width: 600px; margin: -40px auto 50px; color: var(--text-secondary);" data-translate="contact_subtitle">هل لديك فكرة مشروع؟ أو ترغب في مناقشة حلول أتمتة لعملك؟ املأ النموذج أدناه وسأتواصل معك قريبًا.</p>
+                <form id="contact-form" style="display: flex; flex-direction: column; gap: 20px;">
+                    <input type="text" id="name" name="name" class="form-input" required data-translate-placeholder="contact_form_name">
+                    <input type="email" id="email" name="email" class="form-input" required data-translate-placeholder="contact_form_email">
+                    <textarea id="message" name="message" class="form-input" required data-translate-placeholder="contact_form_message"></textarea>
+                    <button type="submit" class="submit-btn" id="submit-button" data-translate="contact_form_submit">إرسال الطلب</button>
                 </form>
                 <div id="form-status"></div>
             </div>
         </section>
     </main>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-social-links">
-                <a href="https://github.com/your-username" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                <a href="https://github.com/Mohammed5778" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
                 <a href="https://linkedin.com/in/your-profile" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
             </div>
-            <p class="footer-copyright">© 2024 محمد ابراهيم عبدالله. جميع الحقوق محفوظة.</p>
+            <p class="footer-copyright" data-translate="footer_copyright">© 2024 محمد ابراهيم عبدالله. جميع الحقوق محفوظة.</p>
         </div>
     </footer>
 
-    <script>
-    document.addEventListener('DOMContentLoaded', () => {
+<script>
+document.addEventListener('DOMContentLoaded', () => {
 
-        const projectsData = [
-            {
-                title: "نظام إدارة حجوزات فندقية",
-                category: "n8n Workflows",
-                description: "ووركفلو متكامل يربط بين نموذج حجز على موقع الويب، Google Sheets لتسجيل البيانات، ويرسل تأكيدات فورية للعميل والإدارة عبر Telegram و Email.",
-                link: "#", 
-                image: "https://images.unsplash.com/photo-1582719508461-905c673771fd?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600"
-            },
-            {
-                title: "موقع NovaLab الشبيه بـ Midjourney",
-                category: "مواقع",
-                description: "موقع يعتمد على البرومبتات لتوليد صور فنية باستخدام AI. يتضمن واجهة مستخدم حديثة ونظام تكامل مع واجهات توليد الصور البرمجية.",
-                link: "#",
-                image: "https://images.unsplash.com/photo-1677756119517-756a188d2d94?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600"
-            },
-            {
-                title: "بوت تليجرام لخدمة العملاء",
-                category: "n8n Workflows",
-                description: "بوت ذكي يرد على استفسارات العملاء الشائعة، ويسجل الطلبات المعقدة في قاعدة بيانات، ويرسل تنبيهًا لفريق الدعم للحالات الطارئة.",
-                link: "#",
-                image: "https://images.unsplash.com/photo-1611606063065-ee7946f0787a?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600"
-            },
-            {
-                title: "منصة SaaS لتحليل السوشيال ميديا",
-                category: "مواقع",
-                description: "واجهة SaaS تسمح للعملاء بربط حساباتهم لتحليل الأداء، وتوليد تقارير تلقائية، واقتراح محتوى باستخدام الذكاء الاصطناعي.",
-                link: "#",
-                image: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600"
-            },
-             {
-                title: "أتمتة تحليل ملفات PDF",
-                category: "n8n Workflows",
-                description: "نظام يقوم بسحب ملفات PDF من البريد الإلكتروني أو مجلد معين، ويستخدم AI لاستخلاص معلومات محددة، ثم يحفظها في Google Sheets.",
-                link: "#",
-                image: "https://images.unsplash.com/photo-1521575107034-e0fa0b594529?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600"
-            },
-            {
-                title: "لعبة مغامرات 2D",
-                category: "مواقع",
-                description: "لعبة منصات ثنائية الأبعاد تم تطويرها باستخدام محرك Godot و GDScript، تتميز بفيزياء ممتعة وتصميم مستويات إبداعي.",
-                link: "#",
-                image: "https://images.unsplash.com/photo-1593305841492-7772cb21b254?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600"
-            }
-        ];
-
-        const projectsGrid = document.getElementById('projects-grid');
-        const filterButtons = document.querySelectorAll('.filter-btn');
-
-        function renderProjects(filter = 'الكل') {
-            projectsGrid.innerHTML = '';
-            const filteredProjects = projectsData.filter(p => filter === 'الكل' || p.category === filter);
-
-            filteredProjects.forEach(project => {
-                const projectCard = `
-                    <div class="project-card">
-                        <img src="${project.image}" alt="${project.title}" class="project-image">
-                        <div class="project-content">
-                            <span class="project-category">${project.category}</span>
-                            <h3 class="project-title">${project.title}</h3>
-                            <p class="project-description">${project.description}</p>
-                            <a href="${project.link}" target="_blank" class="project-link">
-                                شاهد المشروع <i class="fas fa-arrow-left"></i>
-                            </a>
-                        </div>
-                    </div>
-                `;
-                projectsGrid.innerHTML += projectCard;
-            });
+    const translations = {
+        en: {
+            nav_logo: "Mohammed Ibrahim Abdullah",
+            nav_about: "About Me",
+            nav_services: "Services",
+            nav_projects: "Projects",
+            nav_contact: "Contact Me",
+            hero_title: "Mohammed Ibrahim Abdullah",
+            hero_subtitle: "Automation & AI Integration Specialist",
+            hero_description: "I build intelligent systems and custom solutions that connect your ideas to the digital world, using advanced tools like n8n and custom UIs to achieve maximum efficiency.",
+            about_section_title: "Who I Am",
+            about_heading: "Building Bridges Between Ideas & Smart Systems",
+            about_p1: "My passion lies in transforming complex processes into seamless, automated systems. With expertise in building advanced n8n workflows, developing interactive Telegram bots, and designing custom user interfaces, I deliver innovative solutions for businesses and individuals.",
+            about_p2: "I combine my 'vibe coding' skills—programming with a flexible logic without being tied to a specific language—and my past experience in game development (Godot/GDScript) to create solutions that are not only effective but also intelligent and enjoyable to interact with.",
+            about_cert_btn_text: "Download Certificates",
+            services_title: "Services I Offer",
+            projects_title: "Featured Projects",
+            contact_title: "Get in Touch",
+            contact_subtitle: "Have a project idea? Or want to discuss automation solutions for your business? Fill out the form below, and I'll get back to you soon.",
+            contact_form_name: "Full Name",
+            contact_form_email: "Email Address",
+            contact_form_message: "Your message or project details",
+            contact_form_submit: "Send Request",
+            form_success: "Your request has been received successfully! I will contact you soon.",
+            form_error: "An error occurred while sending. Please try again or contact me directly.",
+            form_sending: "Sending...",
+            footer_copyright: "© 2024 Mohammed Ibrahim Abdullah. All rights reserved.",
+            filter_all: "All",
+            filter_websites: "Websites",
+            filter_n8n: "n8n Workflows",
+            project_link_text: "View Project"
+        },
+        ar: {
+            nav_logo: "محمد ابراهيم عبدالله",
+            nav_about: "من أنا",
+            nav_services: "خدماتي",
+            nav_projects: "المشاريع",
+            nav_contact: "تواصل معي",
+            hero_title: "محمد ابراهيم عبدالله",
+            hero_subtitle: "متخصص في أتمتة العمليات وتكامل الذكاء الاصطناعي",
+            hero_description: "أقوم ببناء أنظمة ذكية وحلول مخصصة تربط بين أفكارك والواقع الرقمي، باستخدام أدوات متقدمة مثل n8n وواجهات برمجية مخصصة لتحقيق أقصى كفاءة.",
+            about_section_title: "من أنا",
+            about_heading: "بناء الجسور بين الأفكار والأنظمة الذكية",
+            about_p1: "شغفي يكمن في تحويل العمليات المعقدة إلى أنظمة تلقائية وسلسة. بخبرة في بناء ووركفلوهات متقدمة باستخدام n8n، تطوير بوتات تليجرام تفاعلية، وتصميم واجهات مستخدم مخصصة، أقدم حلولاً مبتكرة للشركات والأفراد.",
+            about_p2: "أجمع بين مهاراتي في \"vibe coding\" — حيث أبرمج بمنطق مرن دون التقيد بلغة معينة — وخبرتي السابقة في صناعة الألعاب (Godot/GDScript)، لإنشاء حلول ليست فقط فعالة، بل أيضًا ذكية وممتعة في التفاعل معها.",
+            about_cert_btn_text: "تحميل ملف الشهادات",
+            services_title: "الخدمات التي أقدمها",
+            projects_title: "أبرز المشاريع",
+            contact_title: "تواصل معي",
+            contact_subtitle: "هل لديك فكرة مشروع؟ أو ترغب في مناقشة حلول أتمتة لعملك؟ املأ النموذج أدناه وسأتواصل معك قريبًا.",
+            contact_form_name: "الاسم الكامل",
+            contact_form_email: "البريد الإلكتروني",
+            contact_form_message: "رسالتك أو تفاصيل مشروعك",
+            contact_form_submit: "إرسال الطلب",
+            form_success: "تم استلام طلبك بنجاح! سيتم التواصل معك قريبًا.",
+            form_error: "حدث خطأ أثناء الإرسال. يرجى المحاولة مرة أخرى أو التواصل معي مباشرة.",
+            form_sending: "...جاري الإرسال",
+            footer_copyright: "© 2024 محمد ابراهيم عبدالله. جميع الحقوق محفوظة.",
+            filter_all: "الكل",
+            filter_websites: "مواقع",
+            filter_n8n: "n8n Workflows",
+            project_link_text: "شاهد المشروع"
         }
+    };
 
-        filterButtons.forEach(button => {
+    const servicesData = [
+        { icon: 'fas fa-cogs', title: { en: 'n8n Process Automation', ar: 'أتمتة العمليات بـ n8n' }, desc: { en: 'Build custom workflows to connect your apps (Google Sheets, Telegram, Email, Webhooks) and save time and effort.', ar: 'بناء ووركفلوهات مخصصة لربط تطبيقاتك (Google Sheets, Telegram, Email, Webhooks) وتوفير الوقت والجهد.' } },
+        { icon: 'fas fa-robot', title: { en: 'Artificial Intelligence Tools', ar: 'أدوات ذكاء اصطناعي' }, desc: { en: 'Create tools for file analysis (PDF, images), customer service, or content generation based on GPT integration.', ar: 'إنشاء أدوات لتحليل الملفات (PDF، صور)، خدمة العملاء، أو توليد المحتوى بالاعتماد على تكامل GPT.' } },
+        { icon: 'fas fa-desktop', title: { en: 'SaaS & Custom Interfaces', ar: 'مواقع SaaS وواجهات مخصصة' }, desc: { en: 'Develop customer-facing SaaS sites and design smart, flexible interfaces to control automation systems.', ar: 'تطوير مواقع SaaS موجهة للعملاء وتصميم واجهات ذكية ومرنة للتحكم في أنظمة الأتمتة.' } },
+        { icon: 'fa-brands fa-telegram', title: { en: 'Custom Telegram Bots', ar: 'بوتات تليجرام مخصصة' }, desc: { en: 'Program interactive Telegram bots for instant notifications, customer management, or as an entry point to your services.', ar: 'برمجة بوتات تليجرام تفاعلية لأنظمة التنبيهات الفورية، إدارة العملاء، أو كنقطة وصول لخدماتك.' } },
+        { icon: 'fas fa-lightbulb', title: { en: 'Technical Consulting', ar: 'استشارات تقنية' }, desc: { en: 'Provide consultations on GPT API integration, choosing the right No-Code tools, and designing automated system architecture.', ar: 'تقديم استشارات في تكامل واجهات GPT، اختيار أدوات No-Code المناسبة، وتصميم بنية الأنظمة المؤتمتة.' } },
+    ];
+    
+    const projectsData = [
+        {
+            title: { en: "Hotel Reservation Management System", ar: "نظام إدارة حجوزات فندقية" },
+            category: { en: "n8n Workflows", ar: "n8n Workflows" },
+            description: { en: "An integrated workflow connecting a booking form to Google Sheets, sending instant confirmations via Telegram and Email.", ar: "ووركفلو متكامل يربط بين نموذج حجز، Google Sheets، ويرسل تأكيدات فورية للعميل والإدارة عبر Telegram و Email." },
+            link: "#",
+            image: "https://images.unsplash.com/photo-1582719508461-905c673771fd?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600"
+        },
+        {
+            title: { en: "NovaLab - Midjourney-like Website", ar: "موقع NovaLab الشبيه بـ Midjourney" },
+            category: { en: "Websites", ar: "مواقع" },
+            description: { en: "A prompt-based website for generating artistic images using AI, featuring a modern UI and API integration.", ar: "موقع يعتمد على البرومبتات لتوليد صور فنية باستخدام AI. يتضمن واجهة مستخدم حديثة وتكامل مع واجهات برمجية." },
+            link: "#",
+            image: "https://images.unsplash.com/photo-1677756119517-756a188d2d94?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600"
+        },
+        {
+            title: { en: "Telegram Customer Service Bot", ar: "بوت تليجرام لخدمة العملاء" },
+            category: { en: "n8n Workflows", ar: "n8n Workflows" },
+            description: { en: "An intelligent bot that answers common customer inquiries, logs complex requests, and alerts the support team for urgent cases.", ar: "بوت ذكي يرد على استفسارات العملاء الشائعة، يسجل الطلبات المعقدة، ويرسل تنبيهًا لفريق الدعم للحالات الطارئة." },
+            link: "#",
+            image: "https://images.unsplash.com/photo-1611606063065-ee7946f0787a?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600"
+        },
+        {
+            title: { en: "Social Media Analytics SaaS Platform", ar: "منصة SaaS لتحليل السوشيال ميديا" },
+            category: { en: "Websites", ar: "مواقع" },
+            description: { en: "A SaaS interface allowing clients to connect accounts to analyze performance, generate reports, and suggest content using AI.", ar: "واجهة SaaS تسمح للعملاء بربط حساباتهم لتحليل الأداء، توليد تقارير، واقتراح محتوى باستخدام الذكاء الاصطناعي." },
+            link: "#",
+            image: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600"
+        },
+        {
+            title: { en: "PDF File Analysis Automation", ar: "أتمتة تحليل ملفات PDF" },
+            category: { en: "n8n Workflows", ar: "n8n Workflows" },
+            description: { en: "A system that pulls PDF files from an email, uses AI to extract specific information, and saves it to Google Sheets.", ar: "نظام يقوم بسحب ملفات PDF من البريد الإلكتروني، يستخدم AI لاستخلاص معلومات محددة، ثم يحفظها في Google Sheets." },
+            link: "#",
+            image: "https://images.unsplash.com/photo-1521575107034-e0fa0b594529?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600"
+        }
+    ];
+    
+    let currentLanguage = 'ar';
+
+    const setLanguage = (lang) => {
+        currentLanguage = lang;
+        const htmlEl = document.documentElement;
+        htmlEl.setAttribute('lang', lang);
+        htmlEl.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+
+        document.querySelectorAll('[data-translate]').forEach(el => {
+            const key = el.getAttribute('data-translate');
+            if (translations[lang] && translations[lang][key]) {
+                el.innerText = translations[lang][key];
+            }
+        });
+
+        document.querySelectorAll('[data-translate-placeholder]').forEach(el => {
+            const key = el.getAttribute('data-translate-placeholder');
+            if (translations[lang] && translations[lang][key]) {
+                el.placeholder = translations[lang][key];
+            }
+        });
+
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.lang === lang);
+        });
+
+        localStorage.setItem('preferredLanguage', lang);
+        renderServices();
+        renderProjectFilters();
+        renderProjects(document.querySelector('.filter-btn.active')?.dataset.filterKey || 'all');
+    };
+    
+    function renderServices() {
+        const grid = document.querySelector('#services .services-grid');
+        grid.innerHTML = '';
+        servicesData.forEach(service => {
+            const card = `<div class="service-card"><div class="service-icon"><i class="${service.icon}"></i></div><h3>${service.title[currentLanguage]}</h3><p>${service.desc[currentLanguage]}</p></div>`;
+            grid.innerHTML += card;
+        });
+    }
+    
+    function renderProjectFilters() {
+        const filtersContainer = document.querySelector('.project-filters');
+        if (!translations[currentLanguage]) return;
+        filtersContainer.innerHTML = `<button class="filter-btn active" data-filter-key="all">${translations[currentLanguage].filter_all}</button><button class="filter-btn" data-filter-key="Websites">${translations[currentLanguage].filter_websites}</button><button class="filter-btn" data-filter-key="n8n Workflows">${translations[currentLanguage].filter_n8n}</button>`;
+        filtersContainer.querySelectorAll('.filter-btn').forEach(button => {
             button.addEventListener('click', () => {
                 document.querySelector('.filter-btn.active').classList.remove('active');
                 button.classList.add('active');
-                renderProjects(button.dataset.filter);
+                renderProjects(button.dataset.filterKey);
             });
         });
+    }
 
-        renderProjects();
+    function renderProjects(filterKey = 'all') {
+        const grid = document.getElementById('projects-grid');
+        grid.innerHTML = '';
+        const filteredProjects = projectsData.filter(p => filterKey === 'all' || p.category.en === filterKey);
+        
+        filteredProjects.forEach(project => {
+            const card = `<div class="project-card"><img src="${project.image}" alt="${project.title[currentLanguage]}" class="project-image"><div class="project-content"><span class="project-category">${project.category[currentLanguage]}</span><h3 class="project-title">${project.title[currentLanguage]}</h3><p class="project-description">${project.description[currentLanguage]}</p><a href="${project.link}" target="_blank" class="project-link">${translations[currentLanguage].project_link_text}<i class="fas ${currentLanguage === 'ar' ? 'fa-arrow-left' : 'fa-arrow-right'} arrow-icon"></i></a></div></div>`;
+            grid.innerHTML += card;
+        });
+    }
 
-        const contactForm = document.getElementById('contact-form');
-        const formStatus = document.getElementById('form-status');
-        const submitButton = document.getElementById('submit-button');
+    const savedLang = localStorage.getItem('preferredLanguage');
+    const browserLang = navigator.language.split('-')[0];
+    const initialLang = savedLang || (browserLang === 'ar' ? 'ar' : 'en');
+    setLanguage(initialLang);
+
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => setLanguage(e.target.dataset.lang));
+    });
+    
+    const contactForm = document.getElementById('contact-form');
+    const formStatus = document.getElementById('form-status');
+    const submitButton = document.getElementById('submit-button');
+
+    contactForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        submitButton.disabled = true;
+        submitButton.textContent = translations[currentLanguage].form_sending;
+        formStatus.style.display = 'none';
+
+        const formData = {
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            message: document.getElementById('message').value,
+        };
         
         const n8nWebhookUrl = 'YOUR_N8N_WEBHOOK_URL';
         const emailjsServiceId = 'YOUR_SERVICE_ID';
         const emailjsTemplateId = 'YOUR_TEMPLATE_ID';
         const emailjsPublicKey = 'YOUR_PUBLIC_KEY';
-        
         emailjs.init(emailjsPublicKey);
-
-        contactForm.addEventListener('submit', function(event) {
-            event.preventDefault();
-            submitButton.disabled = true;
-            submitButton.textContent = '...جاري الإرسال';
-            formStatus.style.display = 'none';
-
-            const formData = {
-                name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                message: document.getElementById('message').value,
-            };
-
-            Promise.all([
-                fetch(n8nWebhookUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                }),
-                emailjs.send(emailjsServiceId, emailjsTemplateId, formData)
-            ])
-            .then(([webhookResponse, emailResponse]) => {
-                if (!webhookResponse.ok) {
-                    console.error('Webhook Error:', webhookResponse);
-                    throw new Error('فشل إرسال Webhook، لكن قد يكون البريد الإلكتروني قد أُرسل.');
-                }
-                console.log('EmailJS Success:', emailResponse);
-                formStatus.textContent = 'تم استلام طلبك بنجاح! سيتم التواصل معك قريبًا.';
-                formStatus.className = 'success';
-                contactForm.reset();
-            })
-            .catch(error => {
-                console.error('Submission Error:', error);
-                formStatus.textContent = 'حدث خطأ أثناء الإرسال. يرجى المحاولة مرة أخرى أو التواصل معي مباشرة.';
-                formStatus.className = 'error';
-            })
-            .finally(() => {
-                formStatus.style.display = 'block';
-                submitButton.disabled = false;
-                submitButton.textContent = 'إرسال الطلب';
-            });
-        });
-
-        const sections = document.querySelectorAll('.section');
-        const observer = new IntersectionObserver(entries => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1 });
-
-        sections.forEach(section => {
-            observer.observe(section);
-        });
         
-        const navLinks = document.querySelectorAll('.nav-link');
-        window.addEventListener('scroll', () => {
-            let current = '';
-            sections.forEach(section => {
-                const sectionTop = section.offsetTop;
-                if (pageYOffset >= sectionTop - 150) {
-                    current = section.getAttribute('id');
-                }
-            });
-
-            navLinks.forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href').includes(current)) {
-                    link.classList.add('active');
-                }
-            });
+        Promise.all([
+            fetch(n8nWebhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) }),
+            emailjs.send(emailjsServiceId, emailjsTemplateId, formData)
+        ])
+        .then(() => {
+            formStatus.textContent = translations[currentLanguage].form_success;
+            formStatus.className = 'success';
+            contactForm.reset();
+        })
+        .catch(error => {
+            console.error('Submission Error:', error);
+            formStatus.textContent = translations[currentLanguage].form_error;
+            formStatus.className = 'error';
+        })
+        .finally(() => {
+            formStatus.style.display = 'block';
+            submitButton.disabled = false;
+            submitButton.textContent = translations[currentLanguage].contact_form_submit;
         });
     });
-    </script>
+
+    const sections = document.querySelectorAll('.section');
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+
+    sections.forEach(section => observer.observe(section));
+
+    const navLinks = document.querySelectorAll('.nav-link');
+    window.addEventListener('scroll', () => {
+        let current = '';
+        sections.forEach(section => {
+            if (pageYOffset >= section.offsetTop - 150) {
+                current = section.getAttribute('id');
+            }
+        });
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href').includes(current)) {
+                link.classList.add('active');
+            }
+        });
+    });
+});
+</script>
+
 </body>
 </html>
