@@ -2,10 +2,12 @@
 import React, { useState, useEffect, useCallback, createContext, useContext, useRef } from 'react';
 import { HashRouter, Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import { auth, database, getCommunityPosts, approveCommunityPost, addCommunityPost } from './services/firebase';
-import { getChatbotResponse } from './services/gemini';
+import { getChatbotResponse, analyzeChatForLeadQualification, getAiConsultation, getBrainstormResponse } from './services/gemini';
 import type { User } from 'firebase/auth';
 import { translations, servicesData, projectsData, ADMIN_EMAIL } from './constants';
-import { CommunityPost, Project, Service } from './types';
+import { CommunityPost, Project, Service, ConsultationResponse } from './types';
+
+const N8N_WEBHOOK_URL = 'https://blackbox5577m.app.n8n.cloud/webhook-test/77c07039-baf3-48df-8762-7e661ff74f0b';
 
 // --- STYLING CONSTANTS ---
 const navLinkBaseClasses = "text-text-secondary font-semibold transition-all duration-300 relative after:content-[''] after:absolute after:-bottom-1 after:left-0 after:w-0 after:h-[2px] after:bg-gradient-to-r after:from-neon-cyan after:to-neon-blue after:transition-all after:duration-300 hover:text-text-primary hover:drop-shadow-[0_0_5px_var(--tw-shadow-color)] hover:shadow-neon-cyan hover:after:w-full";
@@ -381,15 +383,65 @@ const AuthModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
 
 // --- CHATBOT ---
 
+type ChatHistoryItem = { role: 'user' | 'model'; parts: { text: string }[] };
+type ChatbotView = 'main' | 'services' | 'serviceDetail' | 'brainstormInput' | 'brainstormResult' | 'requestService' | 'requestSuccess' | 'consultationInput' | 'consultationResult';
+
 const Chatbot: React.FC = () => {
     const { t, lang, dir } = useLanguage();
     const [isOpen, setIsOpen] = useState(false);
-    const [view, setView] = useState<'main' | 'services' | 'serviceDetail'>('main');
+    const [view, setView] = useState<ChatbotView>('main');
     const [serviceDetail, setServiceDetail] = useState<{ title: string; content: string } | null>(null);
+    const [brainstormIdea, setBrainstormIdea] = useState('');
+    const [brainstormResult, setBrainstormResult] = useState('');
+    const [consultationResult, setConsultationResult] = useState<ConsultationResponse | null>(null);
+    const [consultationProblem, setConsultationProblem] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [showInitialPopup, setShowInitialPopup] = useState(false);
+    const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([]);
+    const [requestFormData, setRequestFormData] = useState({ name: '', email: '', phone: '', message: '', contactMethod: [] as string[] });
     const chatEndRef = useRef<HTMLDivElement>(null);
 
+    const resetChat = () => {
+        setView('main');
+        setServiceDetail(null);
+        setBrainstormIdea('');
+        setBrainstormResult('');
+        setConsultationResult(null);
+        setConsultationProblem('');
+        setChatHistory([]);
+        setRequestFormData({ name: '', email: '', phone: '', message: '', contactMethod: [] });
+    }
+
+    const handleCloseChat = useCallback(async () => {
+        setIsOpen(false);
+        if (chatHistory.length > 0) {
+            try {
+                const analysis = await analyzeChatForLeadQualification(chatHistory);
+                if (analysis?.isHotLead) {
+                    const hotLeadData = {
+                        leadType: 'Hot Lead - Auto Detected',
+                        purchaseIntentScore: analysis.purchaseIntentScore,
+                        businessSummary: analysis.businessSummary,
+                        leadName: analysis.leadName || 'N/A',
+                        leadEmail: analysis.leadEmail || 'N/A',
+                        leadPhone: analysis.leadPhone || 'N/A',
+                        timestamp: new Date().toISOString()
+                    };
+                    await fetch(N8N_WEBHOOK_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(hotLeadData),
+                        mode: 'no-cors' // Fix: Add no-cors mode
+                    });
+                }
+            } catch (error) {
+                // Silently fail is okay here, as this is a background task.
+                console.error("Failed to process or send hot lead webhook:", error);
+            }
+        }
+        resetChat();
+    }, [chatHistory]);
+    
     useEffect(() => {
         const timer = setTimeout(() => setShowInitialPopup(true), 3000);
         return () => clearTimeout(timer);
@@ -397,89 +449,319 @@ const Chatbot: React.FC = () => {
 
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [view, serviceDetail, isLoading]);
+    }, [view, serviceDetail, isLoading, consultationResult, brainstormResult]);
 
-    const handleAction = (action: 'main' | 'services' | 'projects' | 'contact', payload?: any) => {
+    const handleAction = (action: 'main' | 'services' | 'projects' | 'contact' | 'consultation', payload?: any) => {
         if (action === 'main') {
             setView('main');
             setServiceDetail(null);
         } else if (action === 'services') {
             setView('services');
+        } else if (action === 'consultation') {
+            setView('consultationInput');
         } else if (action === 'projects' || action === 'contact') {
             document.getElementById(action)?.scrollIntoView({ behavior: 'smooth' });
-            setIsOpen(false);
+            handleCloseChat();
         }
     };
-
+    
     const handleShowServiceDetail = async (service: Service) => {
         setView('serviceDetail');
         setIsLoading(true);
+        const userPrompt = `Tell me about the "${service.title[lang]}" service.`;
+        const aiPrompt = `Provide a concise, engaging, and persuasive description for the following service: "${service.title[lang]}". Explain its value and benefits for a potential client. Frame it as an investment using the 'leaky bucket' analogy where appropriate.`;
+        
+        setChatHistory(prev => [...prev, { role: 'user', parts: [{ text: userPrompt }] }]);
         setServiceDetail({ title: service.title[lang], content: '' });
 
-        const prompt = `Provide a concise, engaging, and persuasive description for the following service: "${service.title[lang]}". Explain its value and benefits for a potential client. Frame it as an investment using the 'leaky bucket' analogy where appropriate.`;
-        const responseText = await getChatbotResponse(prompt, [], lang);
-
+        const responseText = await getChatbotResponse(aiPrompt, [], lang);
+        setChatHistory(prev => [...prev, { role: 'model', parts: [{ text: responseText }] }]);
         setServiceDetail({ title: service.title[lang], content: responseText });
         setIsLoading(false);
     };
 
+    const handleBrainstormSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setView('brainstormResult');
+        setBrainstormResult('');
+
+        setChatHistory(prev => [...prev, { role: 'user', parts: [{ text: `User idea for ${serviceDetail?.title}: ${brainstormIdea}` }] }]);
+        const response = await getBrainstormResponse(brainstormIdea, serviceDetail?.title || '', lang);
+        setChatHistory(prev => [...prev, { role: 'model', parts: [{ text: response }] }]);
+        
+        setBrainstormResult(response);
+        setIsLoading(false);
+    };
+
+    const handleDiscussIdea = () => {
+        const ideaText = `Service: ${serviceDetail?.title}\n\nUser Idea:\n${brainstormIdea}\n\nAI Feedback:\n${brainstormResult}`;
+        sessionStorage.setItem('prefillContactForm', ideaText);
+        document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+        handleCloseChat();
+    };
+
+    const handleBotCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { value, checked } = e.target;
+        setRequestFormData(prev => {
+            const newMethods = checked
+                ? [...prev.contactMethod, value]
+                : prev.contactMethod.filter(m => m !== value);
+            return {...prev, contactMethod: newMethods};
+        });
+    }
+
+    const handleServiceRequestSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+
+        const serviceRequestData = {
+            leadType: 'Service Request from Bot',
+            serviceType: serviceDetail?.title,
+            ...requestFormData,
+            timestamp: new Date().toISOString()
+        };
+        
+        try {
+            await fetch(N8N_WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(serviceRequestData),
+                mode: 'no-cors' // Fix: Add no-cors mode
+            });
+            setView('requestSuccess');
+        } catch (error) {
+            console.error("Service request submission error:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    const handleConsultationSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+        setView('consultationResult');
+        setConsultationResult(null);
+        setChatHistory(prev => [...prev, { role: 'user', parts: [{ text: `Business Problem: ${consultationProblem}`}] }])
+        
+        const result = await getAiConsultation(consultationProblem);
+        if (result) {
+            setConsultationResult(result);
+            setChatHistory(prev => [...prev, { role: 'model', parts: [{ text: `Generated Proposal: ${JSON.stringify(result)}`}] }])
+        } else {
+            // Handle error case, maybe show an error message
+            setView('consultationInput'); 
+        }
+        setIsLoading(false);
+    }
+
+    const handleDiscussProposal = () => {
+        if (!consultationResult) return;
+        const proposalText = `${t('bot_proposal_title')}\n\n${t('bot_proposal_problem')}:\n${consultationResult.problemAnalysis}\n\n${t('bot_proposal_solution')}:\n${consultationResult.proposedSolution}\n\n${t('bot_proposal_services')}:\n- ${consultationResult.suggestedServices.join('\n- ')}`;
+        sessionStorage.setItem('prefillContactForm', proposalText);
+        document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+        handleCloseChat();
+    };
+    
     const renderContent = () => {
         const optionButtonClasses = "w-full bg-secondary-dark border border-border-color text-neon-cyan text-sm px-3 py-2 rounded-lg hover:bg-neon-cyan hover:text-bg-color transition-colors text-center";
         const backButtonClasses = "w-full bg-transparent border border-text-secondary text-text-secondary text-sm px-3 py-2 rounded-lg hover:bg-text-secondary hover:text-bg-color transition-colors text-center";
 
-        if (view === 'main') {
-            return (
-                <div className="flex flex-col gap-3">
-                     <div className="flex w-full justify-start">
-                        <div className="max-w-[85%] px-4 py-2 rounded-xl bg-secondary-dark text-text-primary rounded-bl-none">
-                            <p className="text-sm break-words">{t('bot_welcome')}</p>
-                        </div>
-                    </div>
-                    <button onClick={() => handleAction('services')} className={optionButtonClasses}>{t('bot_option_services')}</button>
-                    <button onClick={() => handleAction('projects')} className={optionButtonClasses}>{t('bot_option_projects')}</button>
-                    <button onClick={() => handleAction('contact')} className={optionButtonClasses}>{t('bot_option_hire')}</button>
+        const loadingSpinner = (text: string) => (
+            <div className="flex flex-col items-center justify-center gap-3 text-center text-text-secondary">
+                 <div className="flex items-center gap-1.5 py-2">
+                    <span className="h-2 w-2 bg-neon-cyan rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                    <span className="h-2 w-2 bg-neon-cyan rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                    <span className="h-2 w-2 bg-neon-cyan rounded-full animate-bounce"></span>
                 </div>
-            );
-        }
+                <p className="text-sm">{text}</p>
+            </div>
+        );
 
-        if (view === 'services') {
-            return (
-                <div className="flex flex-col gap-2">
-                    {servicesData.map(service => (
-                        <button key={service.title.en} onClick={() => handleShowServiceDetail(service)} className={optionButtonClasses}>{service.title[lang]}</button>
-                    ))}
-                    <button onClick={() => handleAction('main')} className={backButtonClasses}>
-                       <i className={`fas ${dir === 'rtl' ? 'fa-arrow-right' : 'fa-arrow-left'}`}></i> Back
-                    </button>
-                </div>
-            );
-        }
-        
-        if (view === 'serviceDetail') {
-            return (
-                <div className="flex flex-col gap-3">
-                    <div className="flex w-full justify-start">
-                        <div className="max-w-[100%] px-4 py-3 rounded-xl bg-secondary-dark text-text-primary">
-                            <h4 className="font-bold text-base text-neon-cyan mb-2">{serviceDetail?.title}</h4>
-                            {isLoading ? (
-                                 <div className="flex items-center gap-1.5 py-2">
-                                    <span className="h-2 w-2 bg-neon-cyan rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                                    <span className="h-2 w-2 bg-neon-cyan rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                                    <span className="h-2 w-2 bg-neon-cyan rounded-full animate-bounce"></span>
-                                </div>
-                            ) : (
-                                <p className="text-sm break-words whitespace-pre-wrap">{serviceDetail?.content}</p>
-                            )}
+        switch(view) {
+            case 'main':
+                return (
+                    <div className="flex flex-col gap-3">
+                         <div className="flex w-full justify-start">
+                            <div className="max-w-[85%] px-4 py-2 rounded-xl bg-secondary-dark text-text-primary rounded-bl-none">
+                                <p className="text-sm break-words">{t('bot_welcome')}</p>
+                            </div>
                         </div>
+                        <button onClick={() => handleAction('consultation')} className={`${optionButtonClasses} !bg-gradient-to-r !from-neon-cyan !to-neon-blue !text-bg-color !font-bold`}>{t('bot_option_consultation')}</button>
+                        <button onClick={() => handleAction('services')} className={optionButtonClasses}>{t('bot_option_services')}</button>
+                        <button onClick={() => handleAction('projects')} className={optionButtonClasses}>{t('bot_option_projects')}</button>
+                        <button onClick={() => handleAction('contact')} className={optionButtonClasses}>{t('bot_option_hire')}</button>
                     </div>
-                    {!isLoading && (
-                        <>
-                         <button onClick={() => handleAction('contact')} className={optionButtonClasses}>Contact about this</button>
-                         <button onClick={() => handleAction('services')} className={backButtonClasses}>See other services</button>
-                        </>
-                    )}
-                </div>
-            );
+                );
+
+            case 'services':
+                return (
+                    <div className="flex flex-col gap-2">
+                        {servicesData.map(service => (
+                            <button key={service.title.en} onClick={() => handleShowServiceDetail(service)} className={optionButtonClasses}>{service.title[lang]}</button>
+                        ))}
+                        <button onClick={() => handleAction('main')} className={backButtonClasses}>
+                           <i className={`fas ${dir === 'rtl' ? 'fa-arrow-right' : 'fa-arrow-left'}`}></i> {t('bot_back')}
+                        </button>
+                    </div>
+                );
+            
+            case 'serviceDetail':
+                return (
+                    <div className="flex flex-col gap-3">
+                        <div className="flex w-full justify-start">
+                            <div className="max-w-[100%] px-4 py-3 rounded-xl bg-secondary-dark text-text-primary">
+                                <h4 className="font-bold text-base text-neon-cyan mb-2">{serviceDetail?.title}</h4>
+                                {isLoading ? loadingSpinner('') : (
+                                    <p className="text-sm break-words whitespace-pre-wrap">{serviceDetail?.content}</p>
+                                )}
+                            </div>
+                        </div>
+                        {!isLoading && (
+                            <div className="flex flex-col gap-2">
+                                <button onClick={() => { setBrainstormIdea(''); setView('brainstormInput'); }} className={optionButtonClasses}>{t('bot_brainstorm_idea')}</button>
+                                <button onClick={() => setView('requestService')} className={`${optionButtonClasses} !bg-gradient-to-r !from-neon-cyan !to-neon-blue !text-bg-color !font-bold`}>{t('bot_request_this_service')}</button>
+                                <button onClick={() => handleAction('services')} className={backButtonClasses}>{t('bot_back_to_services')}</button>
+                            </div>
+                        )}
+                    </div>
+                );
+
+            case 'brainstormInput':
+                 return (
+                    <div className="flex flex-col gap-3">
+                        <div className="max-w-[100%] px-4 py-3 rounded-xl bg-secondary-dark text-text-primary">
+                            <h4 className="font-bold text-base text-neon-cyan mb-2">{t('bot_brainstorm_idea')}</h4>
+                             <form onSubmit={handleBrainstormSubmit} className="flex flex-col gap-3">
+                                <textarea 
+                                    value={brainstormIdea} 
+                                    onChange={e => setBrainstormIdea(e.target.value)} 
+                                    placeholder={t('bot_brainstorm_prompt')} 
+                                    className={`${formInputClasses} min-h-[120px] !py-2 !text-sm`} 
+                                    required
+                                ></textarea>
+                                <button type="submit" className={`${optionButtonClasses} bg-gradient-to-r from-neon-cyan to-neon-blue !text-bg-color font-bold`} disabled={isLoading}>
+                                    {t('bot_brainstorm_submit')}
+                                </button>
+                            </form>
+                        </div>
+                        <button onClick={() => setView('serviceDetail')} className={backButtonClasses}>{t('bot_back')}</button>
+                    </div>
+                );
+            
+            case 'brainstormResult':
+                 return (
+                    <div className="flex flex-col gap-3">
+                         <div className="flex w-full justify-start">
+                            <div className="max-w-[100%] px-4 py-3 rounded-xl bg-secondary-dark text-text-primary">
+                                <h4 className="font-bold text-base text-neon-cyan mb-2">{t('bot_brainstorm_response_title')}</h4>
+                                {isLoading ? loadingSpinner(t('bot_brainstorm_analyzing')) : (
+                                    <p className="text-sm break-words whitespace-pre-wrap">{brainstormResult}</p>
+                                )}
+                            </div>
+                        </div>
+                        {!isLoading && (
+                            <>
+                             <button onClick={handleDiscussIdea} className={`${optionButtonClasses} !bg-gradient-to-r !from-neon-cyan !to-neon-blue !text-bg-color !font-bold`}>{t('bot_discuss_idea')}</button>
+                             <button onClick={() => setView('brainstormInput')} className={backButtonClasses}>{t('bot_back')}</button>
+                            </>
+                        )}
+                    </div>
+                );
+            
+            case 'requestService':
+                return (
+                    <div className="flex flex-col gap-3">
+                        <div className="max-w-[100%] px-4 py-3 rounded-xl bg-secondary-dark text-text-primary">
+                            <h4 className="font-bold text-base text-neon-cyan mb-2">{t('bot_request_service_title')}</h4>
+                            <p className="text-sm mb-4">{t('bot_request_service_prompt')}</p>
+                            <form onSubmit={handleServiceRequestSubmit} className="flex flex-col gap-4">
+                                <textarea value={requestFormData.message} onChange={e => setRequestFormData({...requestFormData, message: e.target.value})} placeholder={t('bot_request_service_message_placeholder')} className={formInputClasses + " !py-2 !text-sm min-h-[100px]"} required />
+                                <input type="text" value={requestFormData.name} onChange={e => setRequestFormData({...requestFormData, name: e.target.value})} placeholder={t('bot_request_service_name_placeholder')} className={formInputClasses + " !py-2 !text-sm"} required />
+                                <input type="email" value={requestFormData.email} onChange={e => setRequestFormData({...requestFormData, email: e.target.value})} placeholder={t('bot_request_service_email_placeholder')} className={formInputClasses + " !py-2 !text-sm"} required />
+                                <input type="tel" value={requestFormData.phone} onChange={e => setRequestFormData({...requestFormData, phone: e.target.value})} placeholder={t('bot_request_service_phone_placeholder')} className={formInputClasses + " !py-2 !text-sm"} />
+                                 <fieldset className="border border-border-color p-3 rounded-lg">
+                                    <legend className="px-2 text-xs text-text-secondary">{t('contact_form_contact_method')}</legend>
+                                    <div className="grid grid-cols-2 gap-x-4 gap-y-2 pt-1">
+                                        <label className="flex items-center gap-2 cursor-pointer text-sm"><input type="checkbox" name="contactMethod" value="Phone Call" onChange={handleBotCheckboxChange} className={formCheckboxClasses} />{t('contact_phone_call')}</label>
+                                        <label className="flex items-center gap-2 cursor-pointer text-sm"><input type="checkbox" name="contactMethod" value="WhatsApp" onChange={handleBotCheckboxChange} className={formCheckboxClasses} />{t('contact_whatsapp')}</label>
+                                        <label className="flex items-center gap-2 cursor-pointer text-sm"><input type="checkbox" name="contactMethod" value="Zoom" onChange={handleBotCheckboxChange} className={formCheckboxClasses} />{t('contact_zoom')}</label>
+                                        <label className="flex items-center gap-2 cursor-pointer text-sm"><input type="checkbox" name="contactMethod" value="Discord" onChange={handleBotCheckboxChange} className={formCheckboxClasses} />{t('contact_discord')}</label>
+                                    </div>
+                                </fieldset>
+                                <button type="submit" className={`${optionButtonClasses} bg-gradient-to-r from-neon-cyan to-neon-blue !text-bg-color font-bold`} disabled={isLoading}>
+                                    {isLoading ? t('form_sending') : t('bot_request_service_submit')}
+                                </button>
+                            </form>
+                        </div>
+                        <button onClick={() => setView('serviceDetail')} className={backButtonClasses}>{t('bot_back')}</button>
+                    </div>
+                );
+            
+            case 'requestSuccess':
+                 return (
+                     <div className="flex flex-col gap-3 items-center text-center">
+                         <div className="text-5xl text-green-400 mb-3"><i className="fas fa-check-circle"></i></div>
+                         <p className="text-text-primary font-semibold">{t('bot_request_success')}</p>
+                         <button onClick={handleCloseChat} className={optionButtonClasses + " mt-4"}>Close</button>
+                     </div>
+                 );
+
+            case 'consultationInput':
+                return (
+                     <div className="flex flex-col gap-3">
+                        <div className="max-w-[100%] px-4 py-3 rounded-xl bg-secondary-dark text-text-primary">
+                            <h4 className="font-bold text-base text-neon-cyan mb-2">{t('bot_consultation_title')}</h4>
+                            <form onSubmit={handleConsultationSubmit} className="flex flex-col gap-3">
+                                <textarea 
+                                    value={consultationProblem} 
+                                    onChange={e => setConsultationProblem(e.target.value)} 
+                                    placeholder={t('bot_consultation_prompt')} 
+                                    className={`${formInputClasses} min-h-[160px] !py-2 !text-sm`} 
+                                    required
+                                ></textarea>
+                                <button type="submit" className={`${optionButtonClasses} bg-gradient-to-r from-neon-cyan to-neon-blue !text-bg-color font-bold`} disabled={isLoading}>
+                                    {t('bot_consultation_submit')}
+                                </button>
+                            </form>
+                        </div>
+                        <button onClick={() => handleAction('main')} className={backButtonClasses}>{t('bot_back')}</button>
+                    </div>
+                );
+            
+            case 'consultationResult':
+                if (isLoading) {
+                    return loadingSpinner(t('bot_consultation_analyzing'));
+                }
+                if (!consultationResult) {
+                    // This could be an error view
+                    return <p>Error generating proposal.</p>
+                }
+                return (
+                    <div className="flex flex-col gap-3">
+                        <div className="max-w-[100%] px-4 py-3 rounded-xl bg-secondary-dark text-text-primary">
+                            <h4 className="font-bold text-base text-neon-cyan mb-3">{t('bot_proposal_title')}</h4>
+                            <div className="space-y-4 text-sm">
+                                <div>
+                                    <h5 className="font-bold text-text-primary mb-1">{t('bot_proposal_problem')}</h5>
+                                    <p className="text-text-secondary whitespace-pre-wrap">{consultationResult.problemAnalysis}</p>
+                                </div>
+                                 <div>
+                                    <h5 className="font-bold text-text-primary mb-1">{t('bot_proposal_solution')}</h5>
+                                    <p className="text-text-secondary whitespace-pre-wrap">{consultationResult.proposedSolution}</p>
+                                </div>
+                                <div>
+                                    <h5 className="font-bold text-text-primary mb-1">{t('bot_proposal_services')}</h5>
+                                    <ul className="list-disc list-inside text-text-secondary">
+                                        {consultationResult.suggestedServices.map(s => <li key={s}>{s}</li>)}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <button onClick={handleDiscussProposal} className={`${optionButtonClasses} bg-gradient-to-r from-neon-cyan to-neon-blue !text-bg-color font-bold`}>{t('bot_discuss_proposal')}</button>
+                        <button onClick={() => setView('consultationInput')} className={backButtonClasses}>{t('bot_back')}</button>
+                    </div>
+                );
         }
     };
     
@@ -492,7 +774,7 @@ const Chatbot: React.FC = () => {
                         <span className="relative flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon-cyan opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-neon-cyan"></span></span>
                         Mabda Bot
                     </p>
-                    <button onClick={() => setIsOpen(false)} className="text-text-secondary hover:text-text-primary transition-colors"><i className="fas fa-times"></i></button>
+                    <button onClick={handleCloseChat} className="text-text-secondary hover:text-text-primary transition-colors"><i className="fas fa-times"></i></button>
                 </div>
                 <div className="h-96 overflow-y-auto p-4" dir={dir}>
                     {renderContent()}
@@ -507,7 +789,7 @@ const Chatbot: React.FC = () => {
             </div>
 
             {/* FAB */}
-            <button onClick={() => setIsOpen(!isOpen)} className="w-16 h-16 bg-gradient-to-br from-neon-cyan to-neon-blue rounded-full flex items-center justify-center text-bg-color text-2xl shadow-lg animate-pulse transition-transform duration-300 hover:scale-110">
+            <button onClick={() => isOpen ? handleCloseChat() : setIsOpen(true)} className="w-16 h-16 bg-gradient-to-br from-neon-cyan to-neon-blue rounded-full flex items-center justify-center text-bg-color text-2xl shadow-lg animate-pulse transition-transform duration-300 hover:scale-110">
                 <i className={`fas ${isOpen ? 'fa-times' : 'fa-robot'} transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`}></i>
             </button>
         </div>
@@ -597,6 +879,7 @@ const HomePage: React.FC = () => {
     
     // Contact Section
     const ContactSection = () => {
+        const { t, lang } = useLanguage();
         const [status, setStatus] = useState<{type: 'success' | 'error' | '', msg: string} | null>(null);
         const [isSubmitting, setIsSubmitting] = useState(false);
         const [formData, setFormData] = useState({
@@ -607,6 +890,14 @@ const HomePage: React.FC = () => {
             message: '',
             contactMethod: [] as string[]
         });
+
+        useEffect(() => {
+            const prefillMessage = sessionStorage.getItem('prefillContactForm');
+            if (prefillMessage) {
+                setFormData(prev => ({...prev, message: prefillMessage}));
+                sessionStorage.removeItem('prefillContactForm'); // Clean up
+            }
+        }, []);
         
         const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
             const { name, value } = e.target;
@@ -629,15 +920,19 @@ const HomePage: React.FC = () => {
             setStatus(null);
     
             const dataToSubmit = {
+                leadType: 'Confirmed Lead - Contact Form',
                 ...formData,
                 timestamp: new Date().toISOString()
             };
             
-            const n8nWebhookUrl = 'https://blackbox5577m.app.n8n.cloud/webhook-test/77c07039-baf3-48df-8762-7e661ff74f0b';
-            
             try {
                 await Promise.all([
-                    fetch(n8nWebhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dataToSubmit) }),
+                    fetch(N8N_WEBHOOK_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(dataToSubmit),
+                        mode: 'no-cors' // Fix: Add no-cors mode
+                    }),
                     database.ref('messages').push(dataToSubmit)
                 ]);
                 setStatus({type: 'success', msg: t('form_success')});
@@ -667,9 +962,11 @@ const HomePage: React.FC = () => {
                         
                         <fieldset className="border border-border-color p-4 rounded-lg">
                             <legend className="px-2 text-sm text-text-secondary">{t('contact_form_contact_method')}</legend>
-                            <div className="flex gap-x-6 gap-y-2 flex-wrap pt-1">
+                            <div className="grid grid-cols-2 gap-x-6 gap-y-2 pt-1">
                                 <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="contactMethod" value="Phone Call" onChange={handleCheckboxChange} className={formCheckboxClasses} />{t('contact_phone_call')}</label>
                                 <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="contactMethod" value="WhatsApp" onChange={handleCheckboxChange} className={formCheckboxClasses} />{t('contact_whatsapp')}</label>
+                                <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="contactMethod" value="Zoom" onChange={handleCheckboxChange} className={formCheckboxClasses} />{t('contact_zoom')}</label>
+                                <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="contactMethod" value="Discord" onChange={handleCheckboxChange} className={formCheckboxClasses} />{t('contact_discord')}</label>
                             </div>
                         </fieldset>
     

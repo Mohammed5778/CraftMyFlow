@@ -34,3 +34,9 @@ export interface CommunityPost {
   isApproved: boolean;
   createdAt: string;
 }
+
+export interface ConsultationResponse {
+  problemAnalysis: string;
+  proposedSolution: string;
+  suggestedServices: string[];
+}
