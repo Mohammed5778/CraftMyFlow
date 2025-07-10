@@ -2,7 +2,7 @@
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/auth';
 import 'firebase/compat/database';
-import { CommunityPost } from '../types';
+import { CommunityPost, SavedConversation, PurchaseRecord } from '../types';
 
 // Firebase Configuration
 const firebaseConfig = {
@@ -16,7 +16,6 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-// Check if firebase is already initialized to avoid errors
 if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
@@ -24,6 +23,7 @@ if (!firebase.apps.length) {
 export const auth = firebase.auth();
 export const database = firebase.database();
 
+// --- COMMUNITY POSTS ---
 export const addCommunityPost = (postData: Omit<CommunityPost, 'id' | 'createdAt'>) => {
     const postWithTimestamp = {
         ...postData,
@@ -47,7 +47,59 @@ export const getCommunityPosts = (callback: (posts: CommunityPost[]) => void) =>
     return () => postsRef.off('value');
 };
 
-
 export const approveCommunityPost = (postId: string) => {
     return database.ref(`communityPosts/${postId}`).update({ isApproved: true });
+};
+
+
+// --- USER DASHBOARD ---
+
+export const saveConversation = (userId: string, conversationData: Omit<SavedConversation, 'id' | 'createdAt' | 'userId'>) => {
+    const dataWithTimestamp = {
+        ...conversationData,
+        userId,
+        createdAt: new Date().toISOString(),
+    };
+    return database.ref(`users/${userId}/conversations`).push(dataWithTimestamp);
+};
+
+export const getUserConversations = (userId: string, callback: (posts: SavedConversation[]) => void) => {
+    const conversationsRef = database.ref(`users/${userId}/conversations`);
+    conversationsRef.on('value', (snapshot) => {
+        const conversations: SavedConversation[] = [];
+        snapshot.forEach((childSnapshot) => {
+            conversations.push({
+                id: childSnapshot.key!,
+                ...childSnapshot.val(),
+            });
+        });
+        callback(conversations.reverse());
+    });
+    return () => conversationsRef.off('value');
+};
+
+export const addPurchase = (userId: string, post: CommunityPost) => {
+    const purchaseData = {
+        userId,
+        postId: post.id,
+        postTitle: post.title,
+        price: post.isPaid ? post.price : 0,
+        purchasedAt: new Date().toISOString(),
+    };
+    return database.ref(`users/${userId}/purchases/${post.id}`).set(purchaseData);
+};
+
+export const getUserPurchases = (userId: string, callback: (purchases: PurchaseRecord[]) => void) => {
+    const purchasesRef = database.ref(`users/${userId}/purchases`);
+    purchasesRef.on('value', (snapshot) => {
+        const purchases: PurchaseRecord[] = [];
+        snapshot.forEach((childSnapshot) => {
+            purchases.push({
+                id: childSnapshot.key!,
+                ...childSnapshot.val(),
+            });
+        });
+        callback(purchases.reverse());
+    });
+    return () => purchasesRef.off('value');
 };

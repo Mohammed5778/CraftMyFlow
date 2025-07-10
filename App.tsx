@@ -1,11 +1,11 @@
 
 import React, { useState, useEffect, useCallback, createContext, useContext, useRef } from 'react';
-import { HashRouter, Routes, Route, NavLink, useLocation } from 'react-router-dom';
-import { auth, database, getCommunityPosts, approveCommunityPost, addCommunityPost } from './services/firebase';
+import { HashRouter, Routes, Route, NavLink, useLocation, Navigate } from 'react-router-dom';
+import { auth, database, getCommunityPosts, approveCommunityPost, addCommunityPost, saveConversation, getUserConversations, addPurchase, getUserPurchases } from './services/firebase';
 import { getChatbotResponse, analyzeChatForLeadQualification, getAiConsultation, getBrainstormResponse } from './services/gemini';
 import type { User } from 'firebase/auth';
 import { translations, servicesData, projectsData, ADMIN_EMAIL } from './constants';
-import { CommunityPost, Project, Service, ConsultationResponse } from './types';
+import { CommunityPost, Project, Service, ConsultationResponse, SavedConversation, PurchaseRecord } from './types';
 
 const N8N_WEBHOOK_URL = 'https://blackbox5577m.app.n8n.cloud/webhook-test/77c07039-baf3-48df-8762-7e661ff74f0b';
 
@@ -14,7 +14,7 @@ const navLinkBaseClasses = "text-text-secondary font-semibold transition-all dur
 const navLinkActiveClasses = "text-text-primary drop-shadow-[0_0_5px_var(--tw-shadow-color)] shadow-neon-cyan after:w-full";
 const authBtnClasses = "px-4 py-1.5 border border-neon-cyan text-neon-cyan rounded-full text-sm font-semibold transition-all duration-300 hover:bg-neon-cyan hover:text-bg-color hover:shadow-[0_0_15px_var(--tw-shadow-color)] shadow-neon-cyan";
 const logoutBtnClasses = "border-red-500 text-red-500 hover:bg-red-500";
-const ctaBtnClasses = "px-6 py-3 rounded-lg font-bold text-bg-color bg-gradient-to-r from-neon-cyan to-neon-blue transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_20px_var(--tw-shadow-color)] shadow-neon-blue/50";
+const ctaBtnClasses = "px-6 py-3 rounded-lg font-bold text-bg-color bg-gradient-to-r from-neon-cyan to-neon-blue transition-all duration-300 transform hover:scale-105 hover:shadow-[0_0_20px_var(--tw-shadow-color)] shadow-neon-blue/50 disabled:opacity-50 disabled:cursor-not-allowed";
 const ctaBtnSecondaryClasses = "bg-none border-2 border-neon-cyan text-neon-cyan hover:bg-neon-cyan hover:text-bg-color";
 const formInputClasses = "w-full bg-primary-dark border border-border-color rounded-lg px-4 py-3 text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-neon-blue transition-colors";
 const formCheckboxClasses = "w-5 h-5 bg-primary-dark border-border-color text-neon-cyan rounded focus:ring-neon-blue focus:ring-offset-bg-color cursor-pointer";
@@ -145,6 +145,7 @@ const MainLayout: React.FC = () => {
                     <Route path="/" element={<HomePage />} />
                     <Route path="/community" element={<CommunityPage />} />
                     <Route path="/admin" element={<AdminPage />} />
+                    <Route path="/dashboard" element={<DashboardPage />} />
                 </Routes>
             </main>
             <Chatbot />
@@ -162,17 +163,24 @@ const Header: React.FC = () => {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const location = useLocation();
 
-    const navLinks = [
-        { to: "/#about", key: "nav_about" },
-        { to: "/#services", key: "nav_services" },
-        { to: "/#projects", key: "nav_projects" },
-        { to: "/community", key: "nav_community" },
-        { to: "/#contact", key: "nav_contact" },
-    ];
-    
-    if (isAdmin) {
-        navLinks.push({ to: "/admin", key: "nav_admin" });
+    const getNavLinks = () => {
+        const links = [
+            { to: "/#about", key: "nav_about" },
+            { to: "/#services", key: "nav_services" },
+            { to: "/#projects", key: "nav_projects" },
+            { to: "/community", key: "nav_community" },
+        ];
+        if (currentUser) {
+            links.push({ to: "/dashboard", key: "nav_dashboard" });
+        }
+        if (isAdmin) {
+            links.push({ to: "/admin", key: "nav_admin" });
+        }
+        links.push({ to: "/#contact", key: "nav_contact" });
+        return links;
     }
+
+    const navLinks = getNavLinks();
 
     const NavLinkItem: React.FC<{ to: string, children: React.ReactNode, onClick?: () => void }> = ({ to, children, onClick }) => {
         const isHomePageLink = to.startsWith('/#');
@@ -183,8 +191,6 @@ const Header: React.FC = () => {
             if (isHomePageLink && location.pathname === '/') {
                 e.preventDefault();
                 document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth' });
-            } else if (isHomePageLink && location.pathname !== '/') {
-                 // Already handled by NavLink default behavior to change page
             }
         };
 
@@ -388,6 +394,7 @@ type ChatbotView = 'main' | 'services' | 'serviceDetail' | 'brainstormInput' | '
 
 const Chatbot: React.FC = () => {
     const { t, lang, dir } = useLanguage();
+    const { currentUser } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const [view, setView] = useState<ChatbotView>('main');
     const [serviceDetail, setServiceDetail] = useState<{ title: string; content: string } | null>(null);
@@ -399,8 +406,9 @@ const Chatbot: React.FC = () => {
     const [showInitialPopup, setShowInitialPopup] = useState(false);
     const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([]);
     const [requestFormData, setRequestFormData] = useState({ name: '', email: '', phone: '', message: '', contactMethod: [] as string[] });
+    const [isConvoSaved, setIsConvoSaved] = useState(false);
     const chatEndRef = useRef<HTMLDivElement>(null);
-
+    
     const resetChat = () => {
         setView('main');
         setServiceDetail(null);
@@ -410,6 +418,7 @@ const Chatbot: React.FC = () => {
         setConsultationProblem('');
         setChatHistory([]);
         setRequestFormData({ name: '', email: '', phone: '', message: '', contactMethod: [] });
+        setIsConvoSaved(false);
     }
 
     const handleCloseChat = useCallback(async () => {
@@ -431,11 +440,10 @@ const Chatbot: React.FC = () => {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(hotLeadData),
-                        mode: 'no-cors' // Fix: Add no-cors mode
+                        mode: 'no-cors'
                     });
                 }
             } catch (error) {
-                // Silently fail is okay here, as this is a background task.
                 console.error("Failed to process or send hot lead webhook:", error);
             }
         }
@@ -450,6 +458,10 @@ const Chatbot: React.FC = () => {
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [view, serviceDetail, isLoading, consultationResult, brainstormResult]);
+    
+    useEffect(() => {
+        setIsConvoSaved(false);
+    }, [view])
 
     const handleAction = (action: 'main' | 'services' | 'projects' | 'contact' | 'consultation', payload?: any) => {
         if (action === 'main') {
@@ -500,6 +512,21 @@ const Chatbot: React.FC = () => {
         document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
         handleCloseChat();
     };
+    
+     const handleSaveBrainstorm = async () => {
+        if (!currentUser || !brainstormResult) return;
+        try {
+            await saveConversation(currentUser.uid, {
+                type: 'brainstorm',
+                userInput: brainstormIdea,
+                aiResponse: brainstormResult,
+                serviceTitle: serviceDetail?.title || 'General'
+            });
+            setIsConvoSaved(true);
+        } catch (error) {
+            console.error("Failed to save brainstorm:", error);
+        }
+    };
 
     const handleBotCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { value, checked } = e.target;
@@ -527,7 +554,7 @@ const Chatbot: React.FC = () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(serviceRequestData),
-                mode: 'no-cors' // Fix: Add no-cors mode
+                mode: 'no-cors'
             });
             setView('requestSuccess');
         } catch (error) {
@@ -549,11 +576,24 @@ const Chatbot: React.FC = () => {
             setConsultationResult(result);
             setChatHistory(prev => [...prev, { role: 'model', parts: [{ text: `Generated Proposal: ${JSON.stringify(result)}`}] }])
         } else {
-            // Handle error case, maybe show an error message
             setView('consultationInput'); 
         }
         setIsLoading(false);
     }
+    
+    const handleSaveConsultation = async () => {
+        if (!currentUser || !consultationResult) return;
+        try {
+            await saveConversation(currentUser.uid, {
+                type: 'consultation',
+                userInput: consultationProblem,
+                aiResponse: consultationResult
+            });
+            setIsConvoSaved(true);
+        } catch (error) {
+            console.error("Failed to save consultation:", error);
+        }
+    };
 
     const handleDiscussProposal = () => {
         if (!consultationResult) return;
@@ -564,7 +604,7 @@ const Chatbot: React.FC = () => {
     };
     
     const renderContent = () => {
-        const optionButtonClasses = "w-full bg-secondary-dark border border-border-color text-neon-cyan text-sm px-3 py-2 rounded-lg hover:bg-neon-cyan hover:text-bg-color transition-colors text-center";
+        const optionButtonClasses = "w-full bg-secondary-dark border border-border-color text-neon-cyan text-sm px-3 py-2 rounded-lg hover:bg-neon-cyan hover:text-bg-color transition-colors text-center disabled:opacity-50 disabled:cursor-not-allowed";
         const backButtonClasses = "w-full bg-transparent border border-text-secondary text-text-secondary text-sm px-3 py-2 rounded-lg hover:bg-text-secondary hover:text-bg-color transition-colors text-center";
 
         const loadingSpinner = (text: string) => (
@@ -661,10 +701,11 @@ const Chatbot: React.FC = () => {
                             </div>
                         </div>
                         {!isLoading && (
-                            <>
-                             <button onClick={handleDiscussIdea} className={`${optionButtonClasses} !bg-gradient-to-r !from-neon-cyan !to-neon-blue !text-bg-color !font-bold`}>{t('bot_discuss_idea')}</button>
-                             <button onClick={() => setView('brainstormInput')} className={backButtonClasses}>{t('bot_back')}</button>
-                            </>
+                            <div className="space-y-2">
+                               {currentUser && <button onClick={handleSaveBrainstorm} disabled={isConvoSaved} className={optionButtonClasses}>{isConvoSaved ? t('dashboard_convo_saved') : t('dashboard_save_convo')}</button>}
+                               <button onClick={handleDiscussIdea} className={`${optionButtonClasses} !bg-gradient-to-r !from-neon-cyan !to-neon-blue !text-bg-color !font-bold`}>{t('bot_discuss_idea')}</button>
+                               <button onClick={() => setView('brainstormInput')} className={backButtonClasses}>{t('bot_back')}</button>
+                            </div>
                         )}
                     </div>
                 );
@@ -676,10 +717,10 @@ const Chatbot: React.FC = () => {
                             <h4 className="font-bold text-base text-neon-cyan mb-2">{t('bot_request_service_title')}</h4>
                             <p className="text-sm mb-4">{t('bot_request_service_prompt')}</p>
                             <form onSubmit={handleServiceRequestSubmit} className="flex flex-col gap-4">
-                                <textarea value={requestFormData.message} onChange={e => setRequestFormData({...requestFormData, message: e.target.value})} placeholder={t('bot_request_service_message_placeholder')} className={formInputClasses + " !py-2 !text-sm min-h-[100px]"} required />
-                                <input type="text" value={requestFormData.name} onChange={e => setRequestFormData({...requestFormData, name: e.target.value})} placeholder={t('bot_request_service_name_placeholder')} className={formInputClasses + " !py-2 !text-sm"} required />
-                                <input type="email" value={requestFormData.email} onChange={e => setRequestFormData({...requestFormData, email: e.target.value})} placeholder={t('bot_request_service_email_placeholder')} className={formInputClasses + " !py-2 !text-sm"} required />
-                                <input type="tel" value={requestFormData.phone} onChange={e => setRequestFormData({...requestFormData, phone: e.target.value})} placeholder={t('bot_request_service_phone_placeholder')} className={formInputClasses + " !py-2 !text-sm"} />
+                                <textarea value={requestFormData.message} onChange={e => setRequestFormData(prev => ({...prev, message: e.target.value}))} placeholder={t('bot_request_service_message_placeholder')} className={formInputClasses + " !py-2 !text-sm min-h-[100px]"} required />
+                                <input type="text" value={requestFormData.name} onChange={e => setRequestFormData(prev => ({...prev, name: e.target.value}))} placeholder={t('bot_request_service_name_placeholder')} className={formInputClasses + " !py-2 !text-sm"} required />
+                                <input type="email" value={requestFormData.email} onChange={e => setRequestFormData(prev => ({...prev, email: e.target.value}))} placeholder={t('bot_request_service_email_placeholder')} className={formInputClasses + " !py-2 !text-sm"} required />
+                                <input type="tel" value={requestFormData.phone} onChange={e => setRequestFormData(prev => ({...prev, phone: e.target.value}))} placeholder={t('bot_request_service_phone_placeholder')} className={formInputClasses + " !py-2 !text-sm"} />
                                  <fieldset className="border border-border-color p-3 rounded-lg">
                                     <legend className="px-2 text-xs text-text-secondary">{t('contact_form_contact_method')}</legend>
                                     <div className="grid grid-cols-2 gap-x-4 gap-y-2 pt-1">
@@ -734,7 +775,6 @@ const Chatbot: React.FC = () => {
                     return loadingSpinner(t('bot_consultation_analyzing'));
                 }
                 if (!consultationResult) {
-                    // This could be an error view
                     return <p>Error generating proposal.</p>
                 }
                 return (
@@ -758,8 +798,11 @@ const Chatbot: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                        <button onClick={handleDiscussProposal} className={`${optionButtonClasses} bg-gradient-to-r from-neon-cyan to-neon-blue !text-bg-color font-bold`}>{t('bot_discuss_proposal')}</button>
-                        <button onClick={() => setView('consultationInput')} className={backButtonClasses}>{t('bot_back')}</button>
+                        <div className="space-y-2">
+                             {currentUser && <button onClick={handleSaveConsultation} disabled={isConvoSaved} className={optionButtonClasses}>{isConvoSaved ? t('dashboard_convo_saved') : t('dashboard_save_convo')}</button>}
+                             <button onClick={handleDiscussProposal} className={`${optionButtonClasses} !bg-gradient-to-r !from-neon-cyan !to-neon-blue !text-bg-color !font-bold`}>{t('bot_discuss_proposal')}</button>
+                             <button onClick={() => setView('consultationInput')} className={backButtonClasses}>{t('bot_back')}</button>
+                        </div>
                     </div>
                 );
         }
@@ -784,8 +827,10 @@ const Chatbot: React.FC = () => {
             
              {/* Proactive Welcome Popup */}
             <div className={`absolute bottom-[80px] p-3 bg-secondary-dark border border-neon-cyan rounded-lg shadow-lg transition-all duration-300 ${dir === 'rtl' ? 'left-0' : 'right-0'} ${showInitialPopup && !isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`} dir={dir}>
-                <p className="text-sm text-text-primary">{t('bot_proactive_prompt')}</p>
-                <button onClick={() => { setIsOpen(true); setShowInitialPopup(false); }} className="text-xs font-bold text-neon-cyan mt-1">{t('bot_proactive_cta')}</button>
+                <div className="flex items-center gap-3">
+                    <p className="text-sm text-text-primary">{t('bot_proactive_prompt')}</p>
+                    <button onClick={() => { setIsOpen(true); setShowInitialPopup(false); }} className="text-xs font-bold text-neon-cyan whitespace-nowrap">{t('bot_proactive_cta')}</button>
+                </div>
             </div>
 
             {/* FAB */}
@@ -803,7 +848,6 @@ const HomePage: React.FC = () => {
     const { t, lang, dir } = useLanguage();
     const [isHeroVisible, setIsHeroVisible] = useState(false);
     
-    // Smooth scroll for hash links on initial load
     useEffect(() => {
         const hash = window.location.hash.substring(1);
         if (hash) {
@@ -811,12 +855,10 @@ const HomePage: React.FC = () => {
                 document.getElementById(hash)?.scrollIntoView({ behavior: 'smooth' });
             }, 100);
         }
-        // Animate hero section on load
         const timer = setTimeout(() => setIsHeroVisible(true), 100);
         return () => clearTimeout(timer);
     }, []);
 
-    // Services Section
     const ServicesSection = () => (
         <Section id="services">
             <div className="container mx-auto px-5">
@@ -834,7 +876,6 @@ const HomePage: React.FC = () => {
         </Section>
     );
 
-    // Projects Section
     const ProjectsSection = () => {
         const [filter, setFilter] = useState('all');
         const filters = [
@@ -877,7 +918,6 @@ const HomePage: React.FC = () => {
         );
     }
     
-    // Contact Section
     const ContactSection = () => {
         const { t, lang } = useLanguage();
         const [status, setStatus] = useState<{type: 'success' | 'error' | '', msg: string} | null>(null);
@@ -895,7 +935,7 @@ const HomePage: React.FC = () => {
             const prefillMessage = sessionStorage.getItem('prefillContactForm');
             if (prefillMessage) {
                 setFormData(prev => ({...prev, message: prefillMessage}));
-                sessionStorage.removeItem('prefillContactForm'); // Clean up
+                sessionStorage.removeItem('prefillContactForm');
             }
         }, []);
         
@@ -931,7 +971,7 @@ const HomePage: React.FC = () => {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(dataToSubmit),
-                        mode: 'no-cors' // Fix: Add no-cors mode
+                        mode: 'no-cors'
                     }),
                     database.ref('messages').push(dataToSubmit)
                 ]);
@@ -1024,8 +1064,77 @@ const HomePage: React.FC = () => {
     );
 };
 
-const PostCard: React.FC<{post: CommunityPost}> = ({post}) => {
+const PurchaseModal: React.FC<{post: CommunityPost | null; isOpen: boolean; onClose: () => void; onSuccess: (post: CommunityPost) => void}> = ({post, isOpen, onClose, onSuccess}) => {
     const { t } = useLanguage();
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
+    
+    useEffect(() => {
+        if (isOpen) {
+            setIsProcessing(false);
+            setIsSuccess(false);
+        }
+    }, [isOpen]);
+
+    if (!isOpen || !post) return null;
+
+    const handlePay = (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsProcessing(true);
+        // Simulate payment processing
+        setTimeout(() => {
+            onSuccess(post);
+            setIsProcessing(false);
+            setIsSuccess(true);
+            setTimeout(() => {
+                onClose();
+            }, 2000);
+        }, 1500);
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
+            <div className="bg-primary-dark p-8 rounded-xl border border-border-color w-full max-w-md relative text-start shadow-lg shadow-neon-blue/10" onClick={e => e.stopPropagation()}>
+                <button onClick={onClose} className="absolute top-4 right-4 text-2xl text-text-secondary hover:text-text-primary transition-colors"><i className="fas fa-times"></i></button>
+                
+                {isSuccess ? (
+                    <div className="text-center">
+                        <div className="text-5xl text-green-400 mb-4"><i className="fas fa-check-circle"></i></div>
+                        <h2 className="text-2xl font-bold text-text-primary">{t('purchase_success_title')}</h2>
+                        <p className="text-text-secondary mt-2">{t('purchase_success_message')}</p>
+                    </div>
+                ) : (
+                    <>
+                        <h2 className="text-2xl mb-6 font-bold text-text-primary">{t('purchase_title')}</h2>
+                        <div className="bg-secondary-dark p-4 rounded-lg mb-6 border border-border-color">
+                            <div className="flex justify-between items-center text-text-secondary text-sm"><span>{t('purchase_item')}</span><span>{t('purchase_price')}</span></div>
+                            <div className="flex justify-between items-center text-text-primary font-bold mt-1"><span>{post.title}</span><span>${post.price.toFixed(2)}</span></div>
+                        </div>
+                        <form onSubmit={handlePay}>
+                            <h3 className="text-lg font-semibold text-text-primary mb-4">{t('purchase_card_details')}</h3>
+                            <div className="space-y-4">
+                                <input type="text" placeholder={t('purchase_card_number')} className={formInputClasses} />
+                                <div className="flex gap-4">
+                                    <input type="text" placeholder={t('purchase_card_expiry')} className={formInputClasses} />
+                                    <input type="text" placeholder={t('purchase_card_cvc')} className={formInputClasses} />
+                                </div>
+                            </div>
+                            <button type="submit" className={`${submitBtnClasses} mt-6 !py-3`} disabled={isProcessing}>
+                                {isProcessing ? t('form_sending') : `${t('purchase_pay_now')} $${post.price.toFixed(2)}`}
+                            </button>
+                        </form>
+                    </>
+                )}
+            </div>
+        </div>
+    );
+};
+
+const PostCard: React.FC<{post: CommunityPost; isPurchased: boolean; onPurchase: (post: CommunityPost) => void;}> = ({post, isPurchased, onPurchase}) => {
+    const { t } = useLanguage();
+    
+    const purchaseButtonText = post.isPaid ? (isPurchased ? t('community_purchased') : t('community_purchase')) : (isPurchased ? t('community_enrolled') : t('community_enroll'));
+    
     return (
         <div className="bg-secondary-dark rounded-xl border border-border-color flex flex-col transition-all duration-300 hover:shadow-lg hover:shadow-neon-blue/10 hover:border-neon-blue hover:-translate-y-1">
             <div className="p-6 flex flex-col flex-grow">
@@ -1041,8 +1150,8 @@ const PostCard: React.FC<{post: CommunityPost}> = ({post}) => {
                     <p className="font-bold text-neon-cyan">
                         {post.isPaid ? `$${post.price.toFixed(2)}` : t('community_free')}
                     </p>
-                    <button className={`${ctaBtnClasses} !py-2 !px-4 text-sm`}>
-                        {t(post.isPaid ? 'community_purchase' : 'community_enroll')}
+                    <button onClick={() => onPurchase(post)} disabled={isPurchased} className={`${ctaBtnClasses} !py-2 !px-4 text-sm`}>
+                        {purchaseButtonText}
                     </button>
                 </div>
             </div>
@@ -1153,14 +1262,41 @@ const CommunityPage: React.FC = () => {
     const [posts, setPosts] = useState<CommunityPost[]>([]);
     const [filter, setFilter] = useState<'all' | 'Project' | 'Course' | 'Workshop'>('all');
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [selectedPost, setSelectedPost] = useState<CommunityPost | null>(null);
+    const [purchasedPostIds, setPurchasedPostIds] = useState<Set<string>>(new Set());
 
     useEffect(() => {
         const unsubscribe = getCommunityPosts(allPosts => {
             const approvedPosts = allPosts.filter(p => p.isApproved);
             setPosts(approvedPosts);
         });
-        return () => unsubscribe();
-    }, []);
+
+        let unsubscribePurchases: () => void;
+        if (currentUser) {
+            unsubscribePurchases = getUserPurchases(currentUser.uid, (purchases) => {
+                const ids = new Set(purchases.map(p => p.postId));
+                setPurchasedPostIds(ids);
+            });
+        }
+
+        return () => {
+            unsubscribe();
+            if (unsubscribePurchases) unsubscribePurchases();
+        };
+    }, [currentUser]);
+
+    const handlePurchase = (post: CommunityPost) => {
+        if (!currentUser) {
+            alert("Please log in to purchase items.");
+            return;
+        }
+        setSelectedPost(post);
+    };
+
+    const handlePurchaseSuccess = (post: CommunityPost) => {
+        if (!currentUser) return;
+        addPurchase(currentUser.uid, post);
+    }
 
     const filteredPosts = posts.filter(post => {
         if (filter === 'all') return true;
@@ -1182,20 +1318,23 @@ const CommunityPage: React.FC = () => {
                             <button onClick={() => setFilter('Project')} className={`px-4 py-1.5 rounded-full text-sm font-semibold border-2 border-transparent transition-colors ${filter === 'Project' ? 'text-neon-cyan border-neon-cyan bg-neon-cyan/10' : 'text-text-secondary hover:text-text-primary'}`}>{t('community_filter_projects')}</button>
                             <button onClick={() => setFilter('Course')} className={`px-4 py-1.5 rounded-full text-sm font-semibold border-2 border-transparent transition-colors ${filter === 'Course' ? 'text-neon-cyan border-neon-cyan bg-neon-cyan/10' : 'text-text-secondary hover:text-text-primary'}`}>{t('community_filter_courses')}</button>
                         </div>
-                        {/* Create Post Button */}
-                        {currentUser ? (
+                        {currentUser && (
                             <button onClick={() => setIsCreateModalOpen(true)} className={`${ctaBtnClasses} !py-2 !px-5 text-sm`}>
                                 <i className="fas fa-plus ltr:mr-2 rtl:ml-2"></i> {t('community_create_post')}
                             </button>
-                        ) : (
-                           <p className="text-sm text-text-secondary">{t('modal_login_title')} to post.</p>
                         )}
                     </div>
                     
-                    {/* Posts Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {filteredPosts.length > 0 ? (
-                           filteredPosts.map(post => <PostCard key={post.id} post={post} />)
+                           filteredPosts.map(post => (
+                            <PostCard 
+                                key={post.id} 
+                                post={post} 
+                                onPurchase={handlePurchase}
+                                isPurchased={purchasedPostIds.has(post.id)}
+                            />
+                           ))
                         ) : (
                             <div className="col-span-full text-center text-text-secondary py-10 bg-secondary-dark/50 rounded-lg">
                                 <p>No posts found in this category yet.</p>
@@ -1204,7 +1343,8 @@ const CommunityPage: React.FC = () => {
                     </div>
                 </div>
             </Section>
-            {isCreateModalOpen && <CreatePostModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />}
+            <CreatePostModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
+            <PurchaseModal post={selectedPost} isOpen={!!selectedPost} onClose={() => setSelectedPost(null)} onSuccess={handlePurchaseSuccess} />
         </>
     );
 };
@@ -1217,7 +1357,7 @@ const AdminPage: React.FC = () => {
     useEffect(() => {
         if (!isAdmin) return;
         const unsubscribe = getCommunityPosts(allPosts => {
-            setPosts(allPosts); // No filter for admin
+            setPosts(allPosts);
         });
         return () => unsubscribe();
     }, [isAdmin]);
@@ -1232,14 +1372,7 @@ const AdminPage: React.FC = () => {
     };
 
     if (!isAdmin) {
-        return (
-             <Section id="admin" className="min-h-screen pt-32">
-                <div className="container mx-auto px-5 text-center">
-                    <h2 className="text-3xl font-bold text-red-500">Access Denied</h2>
-                    <p className="text-text-secondary mt-4">You must be an administrator to view this page.</p>
-                </div>
-            </Section>
-        );
+        return <Navigate to="/" replace />;
     }
 
     return (
@@ -1286,6 +1419,134 @@ const AdminPage: React.FC = () => {
                             )}
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </Section>
+    );
+};
+
+const DashboardPage: React.FC = () => {
+    const { t } = useLanguage();
+    const { currentUser } = useAuth();
+    const [activeTab, setActiveTab] = useState('conversations');
+
+    const SavedConversationsTab: React.FC = () => {
+        const [conversations, setConversations] = useState<SavedConversation[]>([]);
+        useEffect(() => {
+            if (!currentUser) return;
+            const unsubscribe = getUserConversations(currentUser.uid, setConversations);
+            return () => unsubscribe();
+        }, [currentUser]);
+
+        return (
+            <div className="space-y-6">
+                {conversations.length > 0 ? (
+                    conversations.map(convo => (
+                        <div key={convo.id} className="bg-secondary-dark p-6 rounded-lg border border-border-color">
+                             <span className={`inline-block text-xs font-bold px-3 py-1 rounded-full mb-3 ${convo.type === 'consultation' ? 'bg-blue-500/10 text-blue-400' : 'bg-purple-500/10 text-purple-400'}`}>
+                                {t(convo.type === 'consultation' ? 'dashboard_convo_type_consultation' : 'dashboard_convo_type_brainstorm')}
+                            </span>
+                            <p className="text-sm text-text-secondary mb-1">{t('dashboard_user_input')}:</p>
+                            <p className="font-mono text-sm bg-primary-dark p-3 rounded mb-4 whitespace-pre-wrap">{convo.userInput}</p>
+                            <p className="text-sm text-text-secondary mb-1">{t('dashboard_ai_response')}:</p>
+                            <div className="font-mono text-sm bg-primary-dark p-3 rounded whitespace-pre-wrap">
+                                {typeof convo.aiResponse === 'string' ? convo.aiResponse : 
+                                <div>
+                                    <p><strong>{t('bot_proposal_problem')}:</strong> {convo.aiResponse.problemAnalysis}</p>
+                                    <p className="my-2"><strong>{t('bot_proposal_solution')}:</strong> {convo.aiResponse.proposedSolution}</p>
+                                    <p><strong>{t('bot_proposal_services')}:</strong> {convo.aiResponse.suggestedServices.join(', ')}</p>
+                                </div>}
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div className="text-center text-text-secondary py-10 bg-secondary-dark/50 rounded-lg">{t('dashboard_empty_convos')}</div>
+                )}
+            </div>
+        )
+    };
+    
+    const MyPostsTab: React.FC = () => {
+        const [allPosts, setAllPosts] = useState<CommunityPost[]>([]);
+        useEffect(() => {
+            const unsubscribe = getCommunityPosts(setAllPosts); // Gets all posts
+            return () => unsubscribe();
+        }, []);
+        const myPosts = currentUser ? allPosts.filter(p => p.authorId === currentUser.uid) : [];
+
+        return (
+             <div className="space-y-4">
+                {myPosts.length > 0 ? (
+                    myPosts.map(post => (
+                        <div key={post.id} className="bg-secondary-dark p-4 rounded-lg border border-border-color flex justify-between items-center">
+                            <div className="flex-1">
+                                <h4 className="font-bold text-text-primary">{post.title}</h4>
+                                <p className="text-sm text-text-secondary">{post.description.substring(0,100)}...</p>
+                            </div>
+                            <span className={`px-3 py-1 text-xs font-bold rounded-full ${post.isApproved ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-400'}`}>
+                                {post.isApproved ? t('admin_approved') : t('admin_pending')}
+                            </span>
+                        </div>
+                    ))
+                ) : (
+                    <div className="text-center text-text-secondary py-10 bg-secondary-dark/50 rounded-lg">{t('dashboard_empty_posts')}</div>
+                )}
+            </div>
+        );
+    };
+
+    const MyLibraryTab: React.FC = () => {
+         const [purchases, setPurchases] = useState<PurchaseRecord[]>([]);
+         useEffect(() => {
+            if (!currentUser) return;
+            const unsubscribe = getUserPurchases(currentUser.uid, setPurchases);
+            return () => unsubscribe();
+        }, [currentUser]);
+
+        return (
+             <div className="space-y-4">
+                {purchases.length > 0 ? (
+                    purchases.map(purchase => (
+                        <div key={purchase.id} className="bg-secondary-dark p-4 rounded-lg border border-border-color flex justify-between items-center">
+                            <h4 className="font-bold text-text-primary">{purchase.postTitle}</h4>
+                            <span className="text-sm text-neon-cyan font-bold">${purchase.price.toFixed(2)}</span>
+                        </div>
+                    ))
+                ) : (
+                    <div className="text-center text-text-secondary py-10 bg-secondary-dark/50 rounded-lg">{t('dashboard_empty_purchases')}</div>
+                )}
+            </div>
+        );
+    };
+
+    if (!currentUser) {
+        return <Navigate to="/" replace />;
+    }
+
+    const tabs = [
+        { id: 'conversations', labelKey: 'dashboard_tab_conversations' },
+        { id: 'posts', labelKey: 'dashboard_tab_posts' },
+        { id: 'purchases', labelKey: 'dashboard_tab_purchases' },
+    ];
+
+    return (
+        <Section id="dashboard" className="min-h-screen pt-32">
+            <div className="container mx-auto px-5">
+                <SectionTitle>{t('dashboard_title')}</SectionTitle>
+                <p className="text-center text-text-secondary -mt-12 mb-12 max-w-2xl mx-auto">{t('dashboard_subtitle')}</p>
+                
+                <div className="border-b border-border-color flex justify-center mb-8">
+                    {tabs.map(tab => (
+                        <button key={tab.id} onClick={() => setActiveTab(tab.id)} className={`px-6 py-3 font-semibold transition-colors ${activeTab === tab.id ? 'text-neon-cyan border-b-2 border-neon-cyan' : 'text-text-secondary hover:text-text-primary'}`}>
+                            {t(tab.labelKey)}
+                        </button>
+                    ))}
+                </div>
+                
+                <div>
+                    {activeTab === 'conversations' && <SavedConversationsTab />}
+                    {activeTab === 'posts' && <MyPostsTab />}
+                    {activeTab === 'purchases' && <MyLibraryTab />}
                 </div>
             </div>
         </Section>

@@ -40,3 +40,22 @@ export interface ConsultationResponse {
   proposedSolution: string;
   suggestedServices: string[];
 }
+
+export interface SavedConversation {
+  id: string;
+  userId: string;
+  type: 'consultation' | 'brainstorm';
+  userInput: string;
+  aiResponse: string | ConsultationResponse;
+  createdAt: string;
+  serviceTitle?: string; // for brainstorms
+}
+
+export interface PurchaseRecord {
+    id: string;
+    userId: string;
+    postId: string;
+    postTitle: string;
+    price: number;
+    purchasedAt: string;
+}
