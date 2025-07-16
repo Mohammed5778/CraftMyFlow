@@ -46,6 +46,15 @@ export const translations: Translations = {
         filter_websites: "Websites",
         filter_n8n: "n8n Workflows",
         project_link_text: "View Project",
+        project_case_study_btn: "View Case Study",
+        // Project Modal
+        project_modal_problem: "The Problem",
+        project_modal_solution: "My Solution",
+        project_modal_visuals: "Visual Proof",
+        project_modal_results: "Tangible Results",
+        project_modal_testimonial: "Client Testimonial",
+        project_modal_live_link: "Visit Live Site",
+
         modal_login_title: "Login",
         modal_signup_title: "Create Account",
         modal_password: "Password",
@@ -64,6 +73,7 @@ export const translations: Translations = {
         community_enrolled: "Enrolled",
         community_purchase: "Purchase",
         community_purchased: "Purchased",
+        community_access_content: "Access Content",
         community_free: "Free",
         community_by: "By",
         community_view_details: "View Details",
@@ -99,7 +109,9 @@ export const translations: Translations = {
         purchase_card_cvc: "CVC",
         purchase_pay_now: "Pay Now",
         purchase_success_title: "Purchase Successful!",
-        purchase_success_message: "The item has been added to your dashboard.",
+        purchase_success_message: "The item has been added to your dashboard. Your license key is:",
+        purchase_license_agreement: "I agree to the License Agreement",
+
         // Dashboard
         dashboard_title: "My Dashboard",
         dashboard_subtitle: "Your personal space for saved ideas, posts, and purchases.",
@@ -116,6 +128,8 @@ export const translations: Translations = {
         dashboard_user_input: "Your Input",
         dashboard_ai_response: "AI Response",
         dashboard_view_full_convo: "View Full Conversation",
+        dashboard_license_key: "License Key",
+
         // Chatbot translations
         bot_welcome: "Welcome! I'm Mabda Bot. How can I guide you today? 🤖",
         bot_option_services: "Explore Services",
@@ -199,6 +213,15 @@ export const translations: Translations = {
         filter_websites: "مواقع",
         filter_n8n: "n8n Workflows",
         project_link_text: "شاهد المشروع",
+        project_case_study_btn: "عرض دراسة الحالة",
+        // Project Modal
+        project_modal_problem: "المشكلة",
+        project_modal_solution: "الحل الذي قدمته",
+        project_modal_visuals: "الدليل المرئي",
+        project_modal_results: "النتائج الملموسة",
+        project_modal_testimonial: "شهادة العميل",
+        project_modal_live_link: "زيارة الموقع الحي",
+
         modal_login_title: "تسجيل الدخول",
         modal_signup_title: "إنشاء حساب",
         modal_password: "كلمة المرور",
@@ -217,6 +240,7 @@ export const translations: Translations = {
         community_enrolled: "مسجّل",
         community_purchase: "شراء",
         community_purchased: "تم الشراء",
+        community_access_content: "الوصول للمحتوى",
         community_free: "مجاني",
         community_by: "بواسطة",
         community_view_details: "عرض التفاصيل",
@@ -252,7 +276,9 @@ export const translations: Translations = {
         purchase_card_cvc: "CVC",
         purchase_pay_now: "ادفع الآن",
         purchase_success_title: "نجحت عملية الشراء!",
-        purchase_success_message: "تمت إضافة العنصر إلى لوحة التحكم الخاصة بك.",
+        purchase_success_message: "تمت إضافة العنصر إلى لوحة التحكم الخاصة بك. مفتاح الترخيص الخاص بك هو:",
+        purchase_license_agreement: "أوافق على اتفاقية الترخيص",
+
         // Dashboard
         dashboard_title: "لوحتي",
         dashboard_subtitle: "مساحتك الشخصية للأفكار المحفوظة والمنشورات والمشتريات.",
@@ -269,6 +295,7 @@ export const translations: Translations = {
         dashboard_user_input: "مدخلك",
         dashboard_ai_response: "رد الذكاء الاصطناعي",
         dashboard_view_full_convo: "عرض المحادثة الكاملة",
+        dashboard_license_key: "مفتاح الترخيص",
         // Chatbot translations
         bot_welcome: "أهلاً بك! أنا مبدع بوت. كيف يمكنني إرشادك اليوم؟ 🤖",
         bot_option_services: "استكشف الخدمات",
@@ -318,11 +345,107 @@ export const servicesData: Service[] = [
 ];
 
 export const projectsData: Project[] = [
-    { title: { en: "Hotel Reservation Management System", ar: "نظام إدارة حجوزات فندقية" }, category: { en: "n8n Workflows", ar: "n8n Workflows" }, description: { en: "An integrated workflow connecting a booking form to Google Sheets, sending instant confirmations via Telegram and Email.", ar: "ووركفلو متكامل يربط بين نموذج حجز، Google Sheets، ويرسل تأكيدات فورية للعميل والإدارة عبر Telegram و Email." }, link: "#", image: "https://images.unsplash.com/photo-1582719508461-905c673771fd?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600" },
-    { title: { en: "NovaLab - Midjourney-like Website", ar: "موقع NovaLab الشبيه بـ Midjourney" }, category: { en: "Websites", ar: "مواقع" }, description: { en: "A prompt-based website for generating artistic images using AI, featuring a modern UI and API integration.", ar: "موقع يعتمد على البرومبتات لتوليد صور فنية باستخدام AI. يتضمن واجهة مستخدم حديثة وتكامل مع واجهات برمجية." }, link: "#", image: "https://images.unsplash.com/photo-1677756119517-756a188d2d94?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600" },
-    { title: { en: "Telegram Customer Service Bot", ar: "بوت تليجرام لخدمة العملاء" }, category: { en: "n8n Workflows", ar: "n8n Workflows" }, description: { en: "An intelligent bot that answers common customer inquiries, logs complex requests, and alerts the support team for urgent cases.", ar: "بوت ذكي يرد على استفسارات العملاء الشائعة، يسجل الطلبات المعقدة، ويرسل تنبيهًا لفريق الدعم للحالات الطارئة." }, link: "#", image: "https://images.unsplash.com/photo-1611606063065-ee7946f0787a?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600" },
-    { title: { en: "Social Media Analytics SaaS Platform", ar: "منصة SaaS لتحليل السوشيال ميديا" }, category: { en: "Websites", ar: "مواقع" }, description: { en: "A SaaS interface allowing clients to connect accounts to analyze performance, generate reports, and suggest content using AI.", ar: "واجهة SaaS تسمح للعملاء بربط حساباتهم لتحليل الأداء، توليد تقارير، واقتراح محتوى باستخدام الذكاء الاصطناعي." }, link: "#", image: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600" },
-    { title: { en: "PDF File Analysis Automation", ar: "أتمتة تحليل ملفات PDF" }, category: { en: "n8n Workflows", ar: "n8n Workflows" }, description: { en: "A system that pulls PDF files from an email, uses AI to extract specific information, and saves it to Google Sheets.", ar: "نظام يقوم بسحب ملفات PDF من البريد الإلكتروني، يستخدم AI لاستخلاص معلومات محددة، ثم يحفظها في Google Sheets." }, link: "#", image: "https://images.unsplash.com/photo-1521575107034-e0fa0b594529?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600" }
+    { 
+        title: { en: "Hotel Reservation Management System", ar: "نظام إدارة حجوزات فندقية" }, 
+        category: { en: "n8n Workflows", ar: "n8n Workflows" }, 
+        description: { en: "An integrated workflow connecting a booking form to Google Sheets, sending instant confirmations via Telegram and Email.", ar: "ووركفلو متكامل يربط بين نموذج حجز، Google Sheets، ويرسل تأكيدات فورية للعميل والإدارة عبر Telegram و Email." }, 
+        link: "#", 
+        image: "https://images.unsplash.com/photo-1582719508461-905c673771fd?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600",
+        problem: { en: "A boutique hotel was spending 3+ hours daily manually transferring booking details from their website form to a spreadsheet, leading to booking errors and delayed confirmations for guests.", ar: "فندق بوتيك كان يقضي أكثر من 3 ساعات يوميًا في نقل تفاصيل الحجوزات يدويًا من نموذج الموقع إلى جدول بيانات، مما أدى إلى أخطاء في الحجز وتأخير في تأكيد الحجوزات للنزلاء." },
+        solution: { en: "I designed an n8n workflow triggered by a webhook from the booking form. The workflow automatically parses the data, adds a new row to a Google Sheet for tracking, and sends instant, personalized confirmation messages to both the hotel admin via Telegram and the guest via Email.", ar: "صممت ووركفلو على n8n يتم تفعيله عبر webhook من نموذج الحجز. يقوم الـ workflow تلقائيًا بتحليل البيانات، وإضافة صف جديد إلى Google Sheet للمتابعة، وإرسال رسائل تأكيد فورية ومخصصة لكل من إدارة الفندق عبر Telegram والنزيل عبر البريد الإلكتروني." },
+        visuals: [ { type: 'video', url: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200' } ],
+        results: [
+            { value: "95%", label: { en: "Reduction in manual data entry", ar: "تقليل في إدخال البيانات اليدوي" } },
+            { value: "3 Hours", label: { en: "Saved per day", ar: "ساعات عمل موفرة يوميًا" } },
+            { value: "0", label: { en: "Booking errors since launch", ar: "أخطاء حجز منذ الإطلاق" } }
+        ],
+        testimonial: { 
+            text: { en: "This automation completely changed our operations. What used to be a daily headache is now a seamless process. Our guests are happier with instant confirmations, and we've eliminated overbooking issues.", ar: "هذه الأتمتة غيرت عملياتنا بالكامل. ما كان يمثل صداعًا يوميًا أصبح الآن عملية سلسة. نزلاؤنا أكثر سعادة بالتأكيدات الفورية، وقد قضينا على مشاكل الحجز المزدوج." },
+            author: { en: "Hotel Manager", ar: "مدير الفندق" }
+        }
+    },
+    { 
+        title: { en: "NovaLab - Midjourney-like Website", ar: "موقع NovaLab الشبيه بـ Midjourney" }, 
+        category: { en: "Websites", ar: "مواقع" }, 
+        description: { en: "A prompt-based website for generating artistic images using AI, featuring a modern UI and API integration.", ar: "موقع يعتمد على البرومبتات لتوليد صور فنية باستخدام AI. يتضمن واجهة مستخدم حديثة وتكامل مع واجهات برمجية." }, 
+        link: "#", 
+        image: "https://images.unsplash.com/photo-1677756119517-756a188d2d94?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600",
+        problem: { en: "Digital artists and designers needed a simple, web-based tool to quickly generate high-quality AI images for mood boards and concept art, without the complexity of local installations or Discord-based bots.", ar: "احتاج الفنانون الرقميون والمصممون إلى أداة بسيطة على الويب لتوليد صور عالية الجودة بسرعة باستخدام الذكاء الاصطناعي من أجل لوحات الإلهام والفن التصوري، دون تعقيدات التثبيت المحلي أو البوتات المعتمدة على ديسكورد." },
+        solution: { en: "I built a responsive and fast React-based web application with a sleek, minimalist UI. The site integrates directly with the Imagen 3 API, providing a seamless 'prompt-to-image' experience. It includes user authentication for managing personal galleries.", ar: "بنيت تطبيق ويب سريع الاستجابة ومبني على React بواجهة مستخدم أنيقة وبسيطة. يتكامل الموقع مباشرةً مع Imagen 3 API، مما يوفر تجربة سلسة من 'البرومبت إلى الصورة'. يتضمن نظام مصادقة للمستخدمين لإدارة معارضهم الشخصية." },
+        visuals: [
+            { type: 'image', url: 'https://images.unsplash.com/photo-1677756119517-756a188d2d94?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200' },
+            { type: 'image', url: 'https://images.unsplash.com/photo-1695055303901-799452433f43?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200' }
+        ],
+        results: [
+            { value: "10k+", label: { en: "Images generated in first month", ar: "صورة تم إنشاؤها في الشهر الأول" } },
+            { value: "300%", label: { en: "Increase in average session time", ar: "زيادة في متوسط مدة الجلسة" } },
+            { value: "24/7", label: { en: "Creative tool availability", ar: "توفر الأداة الإبداعية" } }
+        ],
+        testimonial: { 
+            text: { en: "NovaLab has become my go-to for brainstorming. It's incredibly fast and the interface is so intuitive. It's saved me countless hours.", ar: "أصبح NovaLab أداتي المفضلة للعصف الذهني. إنه سريع بشكل لا يصدق والواجهة سهلة الاستخدام للغاية. لقد وفر علي ساعات لا تحصى." },
+            author: { en: "Digital Artist & Creator", ar: "فنان ومبدع رقمي" }
+        }
+    },
+    { 
+        title: { en: "Telegram Customer Service Bot", ar: "بوت تليجرام لخدمة العملاء" }, 
+        category: { en: "n8n Workflows", ar: "n8n Workflows" }, 
+        description: { en: "An intelligent bot that answers common customer inquiries, logs complex requests, and alerts the support team for urgent cases.", ar: "بوت ذكي يرد على استفسارات العملاء الشائعة، يسجل الطلبات المعقدة، ويرسل تنبيهًا لفريق الدعم للحالات الطارئة." }, 
+        link: "#", 
+        image: "https://images.unsplash.com/photo-1611606063065-ee7946f0787a?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600",
+        problem: { en: "An e-commerce store's support team was overwhelmed with repetitive questions about order status and return policies, leading to slow response times for customers with more complex issues.", ar: "كان فريق الدعم لمتجر إلكتروني غارقًا في الأسئلة المتكررة حول حالة الطلبات وسياسات الإرجاع، مما أدى إلى بطء في أوقات الاستجابة للعملاء الذين لديهم مشكلات أكثر تعقيدًا." },
+        solution: { en: "I built an intelligent Telegram bot powered by an n8n workflow. The bot uses AI to understand and answer FAQs instantly. For complex queries, it creates a ticket in a database and notifies the human support team on a dedicated Slack channel with all the chat context.", ar: "بنيت بوت تليجرام ذكيًا مدعومًا بووركفلو n8n. يستخدم البوت الذكاء الاصطناعي لفهم الأسئلة الشائعة والإجابة عليها فورًا. للاستفسارات المعقدة، يقوم بإنشاء تذكرة في قاعدة بيانات وإخطار فريق الدعم البشري على قناة Slack مخصصة مع كامل سياق المحادثة." },
+        visuals: [ { type: 'video', url: 'https://images.unsplash.com/photo-1611606063065-ee7946f0787a?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200' } ],
+        results: [
+            { value: "70%", label: { en: "Of queries automated", ar: "من الاستفسارات تمت أتمتتها" } },
+            { value: "80%", label: { en: "Faster response for complex issues", ar: "استجابة أسرع للمشكلات المعقدة" } },
+            { value: "24/7", label: { en: "Instant support availability", ar: "توفر الدعم الفوري" } }
+        ],
+        testimonial: { 
+            text: { en: "The support bot is a game-changer. Our team can now focus on customers who really need our help, and our overall customer satisfaction has skyrocketed.", ar: "بوت الدعم هو تغيير جذري. يمكن لفريقنا الآن التركيز على العملاء الذين يحتاجون حقًا إلى مساعدتنا، وقد ارتفع رضا العملاء بشكل كبير." },
+            author: { en: "Head of Customer Support", ar: "رئيس قسم دعم العملاء" }
+        }
+    },
+    { 
+        title: { en: "Social Media Analytics SaaS Platform", ar: "منصة SaaS لتحليل السوشيال ميديا" }, 
+        category: { en: "Websites", ar: "مواقع" }, 
+        description: { en: "A SaaS interface allowing clients to connect accounts to analyze performance, generate reports, and suggest content using AI.", ar: "واجهة SaaS تسمح للعملاء بربط حساباتهم لتحليل الأداء، توليد تقارير، واقتراح محتوى باستخدام الذكاء الاصطناعي." }, 
+        link: "#", 
+        image: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600",
+        problem: { en: "Marketing agencies were wasting hours each month manually compiling performance data from different social media platforms into spreadsheets to create client reports.", ar: "كانت وكالات التسويق تهدر ساعات كل شهر في تجميع بيانات الأداء يدويًا من منصات التواصل الاجتماعي المختلفة في جداول بيانات لإنشاء تقارير للعملاء." },
+        solution: { en: "I developed a multi-tenant SaaS platform using React and Firebase. The platform connects to various social media APIs, aggregates data into a unified, interactive dashboard, and allows for one-click generation of professional PDF reports. An AI feature also suggests content ideas based on top-performing posts.", ar: "طورت منصة SaaS متعددة المستخدمين باستخدام React و Firebase. تتصل المنصة بواجهات برمجة تطبيقات وسائل التواصل الاجتماعي المختلفة، وتجمع البيانات في لوحة تحكم موحدة وتفاعلية، وتسمح بإنشاء تقارير PDF احترافية بنقرة واحدة. ميزة الذكاء الاصطناعي تقترح أيضًا أفكارًا للمحتوى بناءً على المنشورات الأفضل أداءً." },
+        visuals: [ 
+            { type: 'image', url: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200' },
+            { type: 'image', url: 'https://images.unsplash.com/photo-1611162616801-6946a3512255?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200' }
+         ],
+        results: [
+            { value: "4 Hrs", label: { en: "Saved per client per month", ar: "ساعات موفرة لكل عميل شهريًا" } },
+            { value: "1-Click", label: { en: "Report Generation", ar: "إنشاء تقارير بنقرة واحدة" } },
+            { value: "50%", label: { en: "Increase in client capacity", ar: "زيادة في قدرة استيعاب العملاء" } }
+        ],
+        testimonial: { 
+            text: { en: "This platform is the backbone of our reporting process now. It's saved us an incredible amount of time and our clients love the professional, data-rich reports.", ar: "هذه المنصة هي العمود الفقري لعملية إعداد التقارير لدينا الآن. لقد وفرت علينا قدرًا لا يصدق من الوقت وعملاؤنا يحبون التقارير الاحترافية والغنية بالبيانات." },
+            author: { en: "Marketing Agency Owner", ar: "صاحب وكالة تسويق" }
+        }
+    },
+    { 
+        title: { en: "PDF File Analysis Automation", ar: "أتمتة تحليل ملفات PDF" }, 
+        category: { en: "n8n Workflows", ar: "n8n Workflows" }, 
+        description: { en: "A system that pulls PDF files from an email, uses AI to extract specific information, and saves it to Google Sheets.", ar: "نظام يقوم بسحب ملفات PDF من البريد الإلكتروني، يستخدم AI لاستخلاص معلومات محددة، ثم يحفظها في Google Sheets." }, 
+        link: "#", 
+        image: "https://images.unsplash.com/photo-1521575107034-e0fa0b594529?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600",
+        problem: { en: "A law firm's paralegals were manually reading hundreds of pages of PDF contracts each day to find and extract specific clauses—a process that was slow, tedious, and prone to human error.", ar: "كان المساعدون القانونيون في شركة محاماة يقرؤون يدويًا مئات الصفحات من عقود PDF كل يوم للعثور على بنود محددة واستخراجها - وهي عملية بطيئة ومملة وعرضة للخطأ البشري." },
+        solution: { en: "An n8n workflow was created to monitor an email inbox. When an email with a PDF attachment arrives, it downloads the file, uses the Gemini API's multimodal capabilities to perform OCR and analyze the content, extracts the required clauses based on predefined patterns, and logs the extracted data into a structured Airtable base.", ar: "تم إنشاء ووركفلو n8n لمراقبة صندوق بريد إلكتروني. عند وصول بريد إلكتروني يحتوي على مرفق PDF، يقوم بتنزيل الملف، ويستخدم القدرات متعددة الوسائط لواجهة برمجة تطبيقات Gemini لإجراء التعرف الضوئي على الحروف وتحليل المحتوى، واستخراج البنود المطلوبة بناءً على أنماط محددة مسبقًا، ويسجل البيانات المستخرجة في قاعدة Airtable منظمة." },
+        visuals: [ { type: 'video', url: 'https://images.unsplash.com/photo-1521575107034-e0fa0b594529?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1200' } ],
+        results: [
+            { value: "99.8%", label: { en: "Data extraction accuracy", ar: "دقة استخراج البيانات" } },
+            { value: "8 Hrs", label: { en: "Saved per paralegal daily", ar: "ساعات عمل موفرة لكل مساعد قانوني يوميًا" } },
+            { value: "4x", label: { en: "Faster case preparation", ar: "تحضير أسرع للقضايا" } }
+        ],
+        testimonial: { 
+            text: { en: "The AI-powered PDF analysis has revolutionized our discovery process. Our team is more efficient, our data is more accurate, and we can move forward on cases faster than ever before.", ar: "لقد أحدث تحليل PDF المدعوم بالذكاء الاصطناعي ثورة في عملية الكشف لدينا. فريقنا أكثر كفاءة، وبياناتنا أكثر دقة، ويمكننا المضي قدمًا في القضايا بشكل أسرع من أي وقت مضى." },
+            author: { en: "Senior Partner, Law Firm", ar: "شريك أول، شركة محاماة" }
+        }
+    }
 ];
 
 export const ADMIN_EMAIL = 'mabda724@gmail.com'; // Admin user email

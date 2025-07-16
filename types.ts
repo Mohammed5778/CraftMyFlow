@@ -20,6 +20,11 @@ export interface Project {
   description: { en: string; ar: string };
   link: string;
   image: string;
+  problem: { en: string; ar: string };
+  solution: { en: string; ar: string };
+  visuals: { type: 'image' | 'video'; url: string; }[];
+  results: { value: string; label: { en: string; ar: string } }[];
+  testimonial: { text: { en: string; ar: string }; author: { en: string; ar: string } };
 }
 
 export interface CommunityPost {
@@ -33,6 +38,7 @@ export interface CommunityPost {
   price: number;
   isApproved: boolean;
   createdAt: string;
+  downloadLink?: string;
 }
 
 export interface ConsultationResponse {
@@ -58,4 +64,5 @@ export interface PurchaseRecord {
     postTitle: string;
     price: number;
     purchasedAt: string;
+    licenseKey?: string;
 }

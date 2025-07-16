@@ -23,6 +23,18 @@ if (!firebase.apps.length) {
 export const auth = firebase.auth();
 export const database = firebase.database();
 
+// --- UTILS ---
+const generateLicenseKey = () => {
+    const segments = [
+        Math.random().toString(36).substring(2, 7),
+        Math.random().toString(36).substring(2, 7),
+        Math.random().toString(36).substring(2, 7),
+        Math.random().toString(36).substring(2, 7)
+    ];
+    return segments.join('-').toUpperCase();
+};
+
+
 // --- COMMUNITY POSTS ---
 export const addCommunityPost = (postData: Omit<CommunityPost, 'id' | 'createdAt'>) => {
     const postWithTimestamp = {
@@ -79,12 +91,13 @@ export const getUserConversations = (userId: string, callback: (posts: SavedConv
 };
 
 export const addPurchase = (userId: string, post: CommunityPost) => {
-    const purchaseData = {
+    const purchaseData: Omit<PurchaseRecord, 'id'> = {
         userId,
         postId: post.id,
         postTitle: post.title,
         price: post.isPaid ? post.price : 0,
         purchasedAt: new Date().toISOString(),
+        licenseKey: post.isPaid ? generateLicenseKey() : undefined,
     };
     return database.ref(`users/${userId}/purchases/${post.id}`).set(purchaseData);
 };

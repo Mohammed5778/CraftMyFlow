@@ -842,11 +842,123 @@ const Chatbot: React.FC = () => {
 };
 
 
+// --- MODALS ---
+
+const ProjectDetailModal: React.FC<{ project: Project | null; isOpen: boolean; onClose: () => void }> = ({ project, isOpen, onClose }) => {
+    const { t, lang, dir } = useLanguage();
+
+    if (!isOpen || !project) return null;
+
+    const SubHeading: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+        <h3 className="text-2xl font-bold text-neon-cyan mb-4">{children}</h3>
+    );
+    
+    const VisualsGallery: React.FC<{ visuals: Project['visuals'] }> = ({ visuals }) => {
+      const [currentIndex, setCurrentIndex] = useState(0);
+
+      if (!visuals || visuals.length === 0) return null;
+      
+      const currentVisual = visuals[currentIndex];
+      
+      return (
+        <div className="mb-8">
+            <div className="relative aspect-video bg-primary-dark rounded-lg overflow-hidden border border-border-color">
+                {currentVisual.type === 'image' ? (
+                     <img src={currentVisual.url} alt="Project visual" className="w-full h-full object-cover" />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                        <img src={currentVisual.url} alt="Video thumbnail" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                            <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center cursor-pointer backdrop-blur-sm hover:bg-white/30 transition-colors">
+                                <i className="fas fa-play text-white text-3xl ltr:pl-1 rtl:pr-1"></i>
+                            </div>
+                        </div>
+                        <span className="absolute bottom-3 right-3 bg-black/50 text-white text-xs px-2 py-1 rounded">Video Preview</span>
+                    </div>
+                )}
+            </div>
+             {visuals.length > 1 && (
+                <div className="flex justify-center gap-2 mt-3">
+                    {visuals.map((_, index) => (
+                        <button key={index} onClick={() => setCurrentIndex(index)} className={`w-3 h-3 rounded-full transition-colors ${currentIndex === index ? 'bg-neon-cyan' : 'bg-border-color hover:bg-text-secondary'}`}></button>
+                    ))}
+                </div>
+            )}
+        </div>
+      );
+    }
+
+    return (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
+            <div className="bg-secondary-dark rounded-xl border border-border-color w-full max-w-4xl h-[90vh] relative shadow-lg shadow-neon-blue/10 flex flex-col" onClick={e => e.stopPropagation()}>
+                <div className="p-6 border-b border-border-color flex justify-between items-center">
+                    <h2 className="text-3xl font-bold bg-gradient-to-r from-neon-cyan to-neon-blue bg-clip-text text-transparent">{project.title[lang]}</h2>
+                    <button onClick={onClose} className="text-2xl text-text-secondary hover:text-text-primary transition-colors"><i className="fas fa-times"></i></button>
+                </div>
+                <div className="flex-grow overflow-y-auto p-8" dir={dir}>
+                    <div className="grid grid-cols-1 lg:grid-cols-5 gap-12">
+                        <div className="lg:col-span-3">
+                            {/* Visual Proof */}
+                            <section className="mb-8">
+                                <SubHeading>{t('project_modal_visuals')}</SubHeading>
+                                <VisualsGallery visuals={project.visuals} />
+                            </section>
+
+                             {/* Testimonial */}
+                            <section className="mb-8">
+                                <SubHeading>{t('project_modal_testimonial')}</SubHeading>
+                                 <blockquote className="bg-primary-dark border-l-4 border-neon-blue p-6 rounded-r-lg italic">
+                                    <p className="text-text-primary mb-4">"{project.testimonial.text[lang]}"</p>
+                                    <footer className="text-text-secondary font-semibold">— {project.testimonial.author[lang]}</footer>
+                                </blockquote>
+                            </section>
+                        </div>
+                        <div className="lg:col-span-2">
+                             {/* Problem */}
+                            <section className="mb-8">
+                                <SubHeading>{t('project_modal_problem')}</SubHeading>
+                                <p className="text-text-secondary">{project.problem[lang]}</p>
+                            </section>
+
+                            {/* Solution */}
+                            <section className="mb-8">
+                                <SubHeading>{t('project_modal_solution')}</SubHeading>
+                                <p className="text-text-secondary">{project.solution[lang]}</p>
+                            </section>
+
+                             {/* Results */}
+                            <section className="mb-8">
+                                <SubHeading>{t('project_modal_results')}</SubHeading>
+                                <div className="space-y-4">
+                                    {project.results.map(result => (
+                                        <div key={result.label.en} className="flex items-center gap-4 bg-primary-dark p-4 rounded-lg">
+                                            <p className="text-4xl font-bold text-neon-blue">{result.value}</p>
+                                            <p className="text-text-primary">{result.label[lang]}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+                            
+                            {project.link !== '#' && (
+                                <a href={project.link} target="_blank" rel="noopener noreferrer" className={`${ctaBtnClasses} w-full text-center inline-block`}>
+                                    {t('project_modal_live_link')} <i className={`fas fa-external-link-alt ltr:ml-2 rtl:mr-2`}></i>
+                                </a>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
 // --- PAGES ---
 
 const HomePage: React.FC = () => {
     const { t, lang, dir } = useLanguage();
     const [isHeroVisible, setIsHeroVisible] = useState(false);
+    const [selectedProject, setSelectedProject] = useState<Project | null>(null);
     
     useEffect(() => {
         const hash = window.location.hash.substring(1);
@@ -905,10 +1017,10 @@ const HomePage: React.FC = () => {
                                     <span className="bg-neon-blue/10 text-neon-blue text-xs font-bold px-3 py-1 rounded-full self-start">{project.category[lang]}</span>
                                     <h3 className="text-xl font-bold my-3">{project.title[lang]}</h3>
                                     <p className="text-text-secondary flex-grow mb-4">{project.description[lang]}</p>
-                                    <a href={project.link} target="_blank" rel="noopener noreferrer" className="font-bold text-neon-cyan self-start group">
-                                        {t('project_link_text')}
+                                    <button onClick={() => setSelectedProject(project)} className="font-bold text-neon-cyan self-start group">
+                                        {t('project_case_study_btn')}
                                         <i className={`fas ${dir === 'rtl' ? 'fa-arrow-left' : 'fa-arrow-right'} transition-transform duration-300 inline-block group-hover:translate-x-1 rtl:group-hover:-translate-x-1 ${dir === 'rtl' ? 'mr-2' : 'ml-2'}`}></i>
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
                         ))}
@@ -1060,19 +1172,24 @@ const HomePage: React.FC = () => {
             <ServicesSection />
             <ProjectsSection />
             <ContactSection />
+            <ProjectDetailModal project={selectedProject} isOpen={!!selectedProject} onClose={() => setSelectedProject(null)} />
         </>
     );
 };
 
-const PurchaseModal: React.FC<{post: CommunityPost | null; isOpen: boolean; onClose: () => void; onSuccess: (post: CommunityPost) => void}> = ({post, isOpen, onClose, onSuccess}) => {
+const PurchaseModal: React.FC<{post: CommunityPost | null; isOpen: boolean; onClose: () => void; onSuccess: (post: CommunityPost, licenseKey?: string) => void}> = ({post, isOpen, onClose, onSuccess}) => {
     const { t } = useLanguage();
     const [isProcessing, setIsProcessing] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [licenseKey, setLicenseKey] = useState('');
+    const [agreed, setAgreed] = useState(false);
     
     useEffect(() => {
         if (isOpen) {
             setIsProcessing(false);
             setIsSuccess(false);
+            setAgreed(false);
+            setLicenseKey('');
         }
     }, [isOpen]);
 
@@ -1080,15 +1197,19 @@ const PurchaseModal: React.FC<{post: CommunityPost | null; isOpen: boolean; onCl
 
     const handlePay = (e: React.FormEvent) => {
         e.preventDefault();
+        if (post.isPaid && !agreed) return;
+
         setIsProcessing(true);
         // Simulate payment processing
         setTimeout(() => {
-            onSuccess(post);
+            const newKey = post.isPaid ? 'KEY-' + Math.random().toString(36).substring(2, 15).toUpperCase() : undefined;
+            if(newKey) setLicenseKey(newKey);
+            onSuccess(post, newKey);
             setIsProcessing(false);
             setIsSuccess(true);
             setTimeout(() => {
                 onClose();
-            }, 2000);
+            }, 3000);
         }, 1500);
     };
 
@@ -1102,6 +1223,7 @@ const PurchaseModal: React.FC<{post: CommunityPost | null; isOpen: boolean; onCl
                         <div className="text-5xl text-green-400 mb-4"><i className="fas fa-check-circle"></i></div>
                         <h2 className="text-2xl font-bold text-text-primary">{t('purchase_success_title')}</h2>
                         <p className="text-text-secondary mt-2">{t('purchase_success_message')}</p>
+                        {licenseKey && <p className="font-mono bg-primary-dark border border-border-color text-neon-cyan p-2 rounded-lg mt-3 text-sm">{licenseKey}</p>}
                     </div>
                 ) : (
                     <>
@@ -1119,7 +1241,13 @@ const PurchaseModal: React.FC<{post: CommunityPost | null; isOpen: boolean; onCl
                                     <input type="text" placeholder={t('purchase_card_cvc')} className={formInputClasses} />
                                 </div>
                             </div>
-                            <button type="submit" className={`${submitBtnClasses} mt-6 !py-3`} disabled={isProcessing}>
+                            {post.isPaid && (
+                                <label className="flex items-center gap-3 mt-6 cursor-pointer text-sm text-text-secondary">
+                                    <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} className={formCheckboxClasses} />
+                                    {t('purchase_license_agreement')}
+                                </label>
+                            )}
+                            <button type="submit" className={`${submitBtnClasses} mt-6 !py-3`} disabled={isProcessing || (post.isPaid && !agreed)}>
                                 {isProcessing ? t('form_sending') : `${t('purchase_pay_now')} $${post.price.toFixed(2)}`}
                             </button>
                         </form>
@@ -1133,7 +1261,23 @@ const PurchaseModal: React.FC<{post: CommunityPost | null; isOpen: boolean; onCl
 const PostCard: React.FC<{post: CommunityPost; isPurchased: boolean; onPurchase: (post: CommunityPost) => void;}> = ({post, isPurchased, onPurchase}) => {
     const { t } = useLanguage();
     
-    const purchaseButtonText = post.isPaid ? (isPurchased ? t('community_purchased') : t('community_purchase')) : (isPurchased ? t('community_enrolled') : t('community_enroll'));
+    const getButtonContent = () => {
+        if (isPurchased) {
+            return t('community_access_content');
+        }
+        if (post.isPaid) {
+            return t('community_purchase');
+        }
+        return t('community_enroll');
+    };
+
+    const handleButtonClick = () => {
+        if (isPurchased && post.downloadLink) {
+            window.open(post.downloadLink, '_blank');
+        } else if (!isPurchased) {
+            onPurchase(post);
+        }
+    };
     
     return (
         <div className="bg-secondary-dark rounded-xl border border-border-color flex flex-col transition-all duration-300 hover:shadow-lg hover:shadow-neon-blue/10 hover:border-neon-blue hover:-translate-y-1">
@@ -1150,8 +1294,8 @@ const PostCard: React.FC<{post: CommunityPost; isPurchased: boolean; onPurchase:
                     <p className="font-bold text-neon-cyan">
                         {post.isPaid ? `$${post.price.toFixed(2)}` : t('community_free')}
                     </p>
-                    <button onClick={() => onPurchase(post)} disabled={isPurchased} className={`${ctaBtnClasses} !py-2 !px-4 text-sm`}>
-                        {purchaseButtonText}
+                    <button onClick={handleButtonClick} className={`${ctaBtnClasses} !py-2 !px-4 text-sm ${isPurchased ? ctaBtnSecondaryClasses : ''}`}>
+                        {getButtonContent()}
                     </button>
                 </div>
             </div>
@@ -1262,7 +1406,7 @@ const CommunityPage: React.FC = () => {
     const [posts, setPosts] = useState<CommunityPost[]>([]);
     const [filter, setFilter] = useState<'all' | 'Project' | 'Course' | 'Workshop'>('all');
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [selectedPost, setSelectedPost] = useState<CommunityPost | null>(null);
+    const [selectedPostForPurchase, setSelectedPostForPurchase] = useState<CommunityPost | null>(null);
     const [purchasedPostIds, setPurchasedPostIds] = useState<Set<string>>(new Set());
 
     useEffect(() => {
@@ -1290,7 +1434,12 @@ const CommunityPage: React.FC = () => {
             alert("Please log in to purchase items.");
             return;
         }
-        setSelectedPost(post);
+        if (!post.isPaid) {
+            // It's a free enrollment
+            addPurchase(currentUser.uid, post);
+        } else {
+            setSelectedPostForPurchase(post);
+        }
     };
 
     const handlePurchaseSuccess = (post: CommunityPost) => {
@@ -1344,7 +1493,7 @@ const CommunityPage: React.FC = () => {
                 </div>
             </Section>
             <CreatePostModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
-            <PurchaseModal post={selectedPost} isOpen={!!selectedPost} onClose={() => setSelectedPost(null)} onSuccess={handlePurchaseSuccess} />
+            <PurchaseModal post={selectedPostForPurchase} isOpen={!!selectedPostForPurchase} onClose={() => setSelectedPostForPurchase(null)} onSuccess={handlePurchaseSuccess} />
         </>
     );
 };
@@ -1507,9 +1656,17 @@ const DashboardPage: React.FC = () => {
              <div className="space-y-4">
                 {purchases.length > 0 ? (
                     purchases.map(purchase => (
-                        <div key={purchase.id} className="bg-secondary-dark p-4 rounded-lg border border-border-color flex justify-between items-center">
-                            <h4 className="font-bold text-text-primary">{purchase.postTitle}</h4>
-                            <span className="text-sm text-neon-cyan font-bold">${purchase.price.toFixed(2)}</span>
+                        <div key={purchase.id} className="bg-secondary-dark p-4 rounded-lg border border-border-color">
+                            <div className="flex justify-between items-center">
+                                <h4 className="font-bold text-text-primary">{purchase.postTitle}</h4>
+                                <span className="text-sm text-neon-cyan font-bold">${purchase.price.toFixed(2)}</span>
+                            </div>
+                            {purchase.licenseKey && (
+                                <div className="mt-3 pt-3 border-t border-border-color">
+                                    <p className="text-xs text-text-secondary mb-1">{t('dashboard_license_key')}:</p>
+                                    <p className="font-mono text-sm bg-primary-dark p-2 rounded">{purchase.licenseKey}</p>
+                                </div>
+                            )}
                         </div>
                     ))
                 ) : (
